@@ -1,0 +1,14 @@
+{
+  "Power": {
+    "tempPower": "1"
+  },
+  "blackUsers": [
+    {
+      "id": "0",
+      "userID": "1",
+      "userName": "2",
+      "userPower": "3",
+      "backUp": "4"
+    }
+  ]
+}
