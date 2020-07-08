@@ -63,6 +63,7 @@ client.on('ready', () => {
 });
 //#endregion
 
+//#region onMessage
 client.on('message', msg => {
 
   //#region 前置偵錯
@@ -136,9 +137,14 @@ function SelectFunctionFromBeforeText(msg, cmd, args = [""]) {
     case 3: //攻略組查表
       DoRaidersGet(msg, cmd[1], args);
       break;
+    default: //關鍵字回復
+      DoBotMessageSend(msg, cmd[0], cmd[1]);
+      break;
   }
 }
+//#endregion
 
+//#region onMessage事件下方法
 //baseFunction
 function DoBaseFunction(msg, cmd, args) {
   switch (cmd) {
@@ -165,14 +171,8 @@ function DoBaseFunction(msg, cmd, args) {
       }
       break;
     case 'test':
-      DoEditRomValue(msg, cmd, args);
-      // myDBFunction.getDataFormRanValue(function (value) {
-      //   if (value) {
-      //     ranValue = value;
-      //   }
-      // });
-      //UpFileData(0, 0, args[0]);
-      //EditRomValue(msg, cmd, args);
+      console.log('arg', args[0], args[1]);
+      findBotMessageToATalk(args[0], args[1]);
       break;
     case 'Alice': { //語音功能
       if (msg.member.voiceChannel) {
@@ -300,7 +300,7 @@ function DoEditRomValue(msg, cmd, args) {
   }
 }
 
-//攻略組
+//攻略組 舊寫法 待優化
 function DoRaidersGet(msg, cmd, args) {
   switch (cmd) {
     case '轉生點':  //轉生點查詢
@@ -335,6 +335,17 @@ function DoRaidersGet(msg, cmd, args) {
   }
 }
 
+//關鍵字回復
+function DoBotMessageSend(msg, cmd, args) {
+  let BTalk;
+  if (args === undefined) BTalk = findBotMessageToATalk(cmd);
+  else BTalk = findBotMessageToATalk(cmd, args);
+
+  if (BTalk !== undefined) msg.channel.send(BTalk.BTalk);
+}
+//#endregion
+
+//#region 方法們
 //攻略組轉生點，資料處理
 function getLevel(level, data, callback) {
   let j = parseFloat(level);
@@ -373,3 +384,20 @@ function findRomValueToID(idName, itemName) {
       return (e[0].canEdit);
   }
 }
+
+//#region status參考
+// 1 = 完全匹配
+// 2 = 相似匹配
+//#endregion
+//根據ATalk找botMessage的對應資料
+function findBotMessageToATalk(cmd, status = 2) {
+  let BTalk;
+  if (status == 1) {
+    BTalk = botMessage.find(item => item.ATalk == cmd);
+  }
+  else if (status == 2) {
+    BTalk = botMessage.find(item => cmd.indexOf(item.ATalk) != -1)
+  }
+  return BTalk;
+}
+//#endregion
