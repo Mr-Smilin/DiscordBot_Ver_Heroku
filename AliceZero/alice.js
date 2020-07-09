@@ -171,8 +171,8 @@ function DoBaseFunction(msg, cmd, args) {
       }
       break;
     case 'test':
-      console.log('arg', args[0], args[1]);
-      findBotMessageToATalk(args[0], args[1]);
+      console.log("test");
+      client.channels.get('725288853249720402').send('test');
       break;
     case 'Alice': { //語音功能
       if (msg.member.voiceChannel) {
@@ -398,6 +398,8 @@ function findBotMessageToATalk(cmd, status = 2) {
   else if (status == 2) {
     BTalk = botMessage.find(item => cmd.indexOf(item.ATalk) != -1)
   }
+
+  //
   return BTalk;
 }
 //#endregion
