@@ -1,7 +1,22 @@
 {
-  "Power": {
-    "tempPower": "1"
-  },
+  "Power": [
+    {
+      "type": "1",
+      "GroupID": "678615262211211308",
+      "GroupName": "石頭's Server",
+      "ChannelID": "725288853249720402",
+      "ChannelName": "測試區",
+      "Power": "1"
+    },
+    {
+      "type": "1",
+      "GroupID": "707946293603074108",
+      "GroupName": "艾恩葛朗特",
+      "ChannelID": "na",
+      "ChannelName": "na",
+      "Power": "012345"
+    }
+  ],
   "blackUsers": [
     {
       "id": "0",

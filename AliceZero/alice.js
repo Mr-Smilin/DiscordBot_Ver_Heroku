@@ -2,6 +2,8 @@
 const Discord = require('discord.js');
 //不變的使用者
 const client = new Discord.Client();
+//播歌
+const ytdl = require('ytdl-core');
 //#endregion
 
 //#region 繼承js
@@ -110,8 +112,9 @@ client.on('message', msg => {
 //新增主要功能時，需要修改這邊的switchTemp與romValue
 function SelectFunctionFromBeforeText(msg, cmd, args = [""]) {
 
+  //#region temp賦予
   //標準
-  let temp = -1;
+  let temp = -2;
   for (let i = 0; i <= romValue.length - 1; i++) {
     if (cmd[0] == romValue[i].value) {
       temp = romValue[i].id;
@@ -127,6 +130,14 @@ function SelectFunctionFromBeforeText(msg, cmd, args = [""]) {
     }
   }
 
+  //權限判斷
+  temp = findPowerFromBaseValue(msg, temp);
+  //正則判斷
+  if (cmd[1] !== undefined)
+    temp = DeleteTempIfHaveEx(cmd[1], temp);
+  else temp = DeleteTempIfHaveEx(cmd[0], temp);
+  //#endregion
+
   switch (temp) {
     case 0: //系統指令
       DoBaseFunction(msg, cmd[1], args);
@@ -138,7 +149,7 @@ function SelectFunctionFromBeforeText(msg, cmd, args = [""]) {
       DoRaidersGet(msg, cmd[1], args);
       break;
     default: //關鍵字回復
-      DoBotMessageSend(msg, cmd[0], cmd[1]);
+      if (temp == -2) DoBotMessageSend(msg, cmd[0], cmd[1]);
       break;
   }
 }
@@ -146,7 +157,7 @@ function SelectFunctionFromBeforeText(msg, cmd, args = [""]) {
 
 //#region onMessage事件下方法
 //baseFunction
-function DoBaseFunction(msg, cmd, args) {
+async function DoBaseFunction(msg, cmd, args) {
   switch (cmd) {
     case 'help':
       messageManager.HelpMessage(Discord.RichEmbed, function (embed) {
@@ -171,14 +182,32 @@ function DoBaseFunction(msg, cmd, args) {
       }
       break;
     case 'test':
-      console.log("test");
-      client.channels.get('725288853249720402').send('test');
+      //msg.channel.send("test")
+      // .then(message => {
+      //message.react("💯") //貼圖回應
+      //message.pin() //釘選
+      //message.delete() //刪除
+      //  }).catch(() => {
+      //something
+      //  })
+      //findPowerFromBaseValue(678615262211211308, 1);
+      //client.channels.get('725288853249720402').send('test');
       break;
-    case 'Alice': { //語音功能
+    case 'react': //重複發言，測試用
+      console.log(msg.content);
+      msg.channel.send(msg.content);
+      break;
+    case 'Alice':   //語音功能
+      let validate = await ytdl.validateURL(args[0]);
+      if (!validate) return msg.channel.send('The link is not working.');
+
       if (msg.member.voiceChannel) {
         if (!msg.guild.voiceConnection) {
           msg.member.voiceChannel.join().then(
             connection => {
+              let stream = ytdl(args[0], { filter: 'audioonly' })
+              let dispatcher = connection.playStream(stream);
+              dispatcher.on("end", end => { msg.member.voiceChannel.leave(); });
             }
           ).catch(console.error);
           msg.channel.send('來了~');
@@ -187,8 +216,7 @@ function DoBaseFunction(msg, cmd, args) {
         msg.reply('請先進入頻道:3...');
       }
       break;
-    }
-    case 'Alice休息': {
+    case 'Alice休息':
       if (msg.guild.voiceConnection) {
         msg.guild.voiceConnection.disconnect();
         msg.channel.send('晚安~');
@@ -196,7 +224,6 @@ function DoBaseFunction(msg, cmd, args) {
         msg.channel.send('可是..我還沒進來:3');
       }
       break;
-    }
   }
 }
 
@@ -272,7 +299,7 @@ function DoEditRomValue(msg, cmd, args) {
                 });
               }
               catch (err) {
-                msg.channel.send('資料更新期間發生例外錯誤!\n如果此問題不斷發生，請通知作者(238行')
+                msg.channel.send('資料更新期間發生例外錯誤!\n如果此問題不斷發生，請通知作者(DoEditRomValue')
                 console.log('DoEditRomValue: ', err);
               }
             }
@@ -341,7 +368,14 @@ function DoBotMessageSend(msg, cmd, args) {
   if (args === undefined) BTalk = findBotMessageToATalk(cmd);
   else BTalk = findBotMessageToATalk(cmd, args);
 
-  if (BTalk !== undefined) msg.channel.send(BTalk.BTalk);
+  if (BTalk !== undefined) {
+    if (BTalk.length != 0) {
+      if (BTalk[0] !== undefined)
+        msg.channel.send(BTalk[0].BTalk);
+      else
+        msg.channel.send(BTalk.BTalk);
+    }
+  };
 }
 //#endregion
 
@@ -393,13 +427,41 @@ function findRomValueToID(idName, itemName) {
 function findBotMessageToATalk(cmd, status = 2) {
   let BTalk;
   if (status == 1) {
-    BTalk = botMessage.find(item => item.ATalk == cmd);
+    BTalk = botMessage.filter(item => item.ATalk == cmd);
   }
   else if (status == 2) {
-    BTalk = botMessage.find(item => cmd.indexOf(item.ATalk) != -1)
+    BTalk = botMessage.filter(item => cmd.indexOf(item.ATalk) != -1)
   }
 
-  //
+  //如果帶回不只一個json，取得觸發字串最大者
+  if (BTalk !== undefined)
+    if (BTalk.length > 1) {
+      let BTalkLength = new Array;
+      BTalk.forEach(item => BTalkLength.push((item.ATalk).length));
+      BTalkLength = Math.max(...BTalkLength);
+      BTalk = BTalk.find(item => (item.ATalk).length == BTalkLength);
+    }
+
   return BTalk;
 }
+
+//權限判斷 預設判斷群組id
+function findPowerFromBaseValue(msg, temp) {
+  let a = baseValue.Power.find(item => item.ChannelID == msg.channel.id && item.Power.indexOf(temp) != -1);
+  if (a !== undefined) temp = -1;
+  else if (baseValue.Power.find(item => item.ChannelID == msg.channel.id) === undefined) {
+    a = baseValue.Power.find(item => item.GroupID == msg.guild.id && item.Power.indexOf(temp) != -1);
+    if (a !== undefined) temp = -1;
+  }
+  return temp;
+}
+
+//正則判斷 有奇怪符號的都給我出去
+function DeleteTempIfHaveEx(msg, temp) {
+  const t = /\!|\@|\:/;
+  let tempValue = temp;
+  if (t.test(msg)) tempValue = -1;
+  return tempValue;
+}
+
 //#endregion
