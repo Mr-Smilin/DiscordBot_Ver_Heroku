@@ -15,6 +15,14 @@
       "ChannelID": "na",
       "ChannelName": "na",
       "Power": "012345"
+    },
+    {
+      "type": "1",
+      "GroupID": "na",
+      "GroupName": "艾恩葛朗特",
+      "ChannelID": "719892968579792907",
+      "ChannelName": "719892968579792907",
+      "Power": ""
     }
   ],
   "blackUsers": [
