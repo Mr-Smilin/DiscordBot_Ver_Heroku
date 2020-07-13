@@ -4,9 +4,17 @@
       "type": "1",
       "GroupID": "678615262211211308",
       "GroupName": "石頭's Server",
+      "ChannelID": "na",
+      "ChannelName": "測試區",
+      "Power": "012349"
+    },
+    {
+      "type": "1",
+      "GroupID": "na",
+      "GroupName": "石頭's Server",
       "ChannelID": "725288853249720402",
       "ChannelName": "測試區",
-      "Power": "1"
+      "Power": ""
     },
     {
       "type": "1",
@@ -14,14 +22,14 @@
       "GroupName": "艾恩葛朗特",
       "ChannelID": "na",
       "ChannelName": "na",
-      "Power": "012345"
+      "Power": "012349"
     },
     {
       "type": "1",
       "GroupID": "na",
       "GroupName": "艾恩葛朗特",
       "ChannelID": "719892968579792907",
-      "ChannelName": "719892968579792907",
+      "ChannelName": "07",
       "Power": ""
     }
   ],
