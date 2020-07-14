@@ -32,8 +32,9 @@ let botMessage;
 
 //歌單
 let songList = new Array();
-let nextSongFromMusicMaster = false;
+let nowSongName;
 let dispatcher;
+let nowMusicPlayGuild = undefined;
 //#endregion
 
 //#region 系統功能-修改romValue-前綴字
@@ -185,8 +186,6 @@ async function DoBaseFunction(msg, cmd, args) {
             }
             break;
         case 'test':
-            dispatcher.pause();
-            console.log(dispatcher);
             //msg.channel.send(myEmoji.get('G001'))
             //msg.channel.send("test")
             // .then(message => {
@@ -200,8 +199,7 @@ async function DoBaseFunction(msg, cmd, args) {
             //client.channels.get('725288853249720402').send('test');
             break;
         case 'test2':
-            dispatcher.resume();
-            console.log(dispatcher);
+            break;
         case 's': //傳貼圖
             sendEmoji(msg, args[0]);
             break;
@@ -212,7 +210,10 @@ async function DoBaseFunction(msg, cmd, args) {
             // console.log('a ',a,'\nb ',a.find(item => item.id==='731062385212653700'));
             break;
         case 'Alice': //語音功能
-            goToMusicHouse(msg, args);
+            if (nowMusicPlayGuild === msg.guild.id || nowMusicPlayGuild === undefined)
+                goToMusicHouse(msg, args);
+            else
+                msg.channel.send('目前有其他群組正在使用此功能，請稍等喔!')
             break;
         case 'Alice休息':
             goBackHomeFromMusicHouse(msg);
@@ -456,43 +457,23 @@ function DeleteTempIfHaveEx(msg, temp) {
 
 //進語音房播歌
 async function goToMusicHouse(msg, args) {
-    if (args[0] === '休息') return goBackHomeFromMusicHouse(msg)
-    if (args[0] === '') return musicMaster(msg);
+    nowMusicPlayGuild = msg.guild.id;
+    switch (args[0]) {
+        case '':
+            return musicMaster(msg);
+        case '休息':
+            return goBackHomeFromMusicHouse(msg);
+        case '先播這個':
+            return addMusicToOne(msg, args);
+    }
+
     let validate = await ytdl.validateURL(args[0]);
     if (!validate) return msg.channel.send('The link is not working.');
 
     if (msg.member.voiceChannel) {
         if (!msg.guild.voiceConnection) {
             addMusicToSongList(args[0]);
-            playMusic(msg, (dis) => {
-                dispatcher = dis;
-                dispatcher.on("end", end => {
-                    console.log('end');
-                    msg.member.voiceChannel.leave();
-                    // console.log('end ', nextSongFromMusicMaster);
-                    // console.log('length ', songList.length);
-                    // if (songList.length == 0) {
-                    //     //如果當前狀態是從控制台切歌的話不退出
-                    //     if (nextSongFromMusicMaster) {
-                    //         console.log('1')
-                    //         nextSongFromMusicMaster = false;
-                    //     } else {
-                    //         console.log('2')
-                    //         msg.member.voiceChannel.leave();
-                    //         msg.channel.send('播完歌了呦~');
-                    //     }
-                    // } else {
-                    //     if (nextSongFromMusicMaster) {
-                    //         console.log('3')
-                    //         nextSongFromMusicMaster = false;
-                    //     } else {
-                    //         console.log('4')
-                    //         songListName.shift();
-                    //         playMusic(msg);
-                    //     }
-                    // }
-                })
-            });
+            playMusic(msg);
             msg.channel.send('來了~').then(
                 msg.delete()
             ).catch(err => console.log(err));
@@ -510,6 +491,7 @@ async function goToMusicHouse(msg, args) {
 
 //退出語音頻道
 function goBackHomeFromMusicHouse(msg) {
+    nowMusicPlayGuild = undefined;
     if (msg.guild.voiceConnection) {
         msg.guild.voiceConnection.disconnect();
         msg.channel.send('晚安~');
@@ -536,45 +518,81 @@ function sendEmoji(msg, args) {
     }
 }
 
+//歌曲插播
+async function addMusicToOne(msg, args) {
+    let validate = await ytdl.validateURL(args[1]);
+    if (!validate) return msg.channel.send('The link is not working.');
+
+    if (msg.member.voiceChannel) {
+        if (!msg.guild.voiceConnection) {
+            addMusicToSongList(args[1]);
+            playMusic(msg);
+            msg.channel.send('來了~').then(
+                msg.delete()
+            ).catch(err => console.log(err));
+        } else {
+            songList.unshift(args[1]);
+            msg.channel.send('好的，下一首播這個喔!').then(
+                msg.delete()
+            ).catch(err => console.log(err));
+        }
+    } else {
+        msg.reply('請先進入頻道:3...');
+    }
+
+}
+
 //添加歌曲進歌單
-async function addMusicToSongList(src) {
+function addMusicToSongList(src) {
     songList.push(src);
 }
 
 //播放歌曲
-async function playMusic(msg, callback) {
-    let stream = await ytdl(songList.shift(), { filter: 'audioonly' });
+async function playMusic(msg) {
+    nowSongName = songList.shift();
+    let stream = await ytdl(nowSongName, { filter: 'audioonly' });
     msg.member.voiceChannel.join().then(
         connection => {
-            callback(connection.playStream(stream));
+            dispatcher = connection.playStream(stream);
+            dispatcher.on("end", end => {
+                if (songList.length != 0) {
+                    playMusic(msg);
+                } else {
+                    goBackHomeFromMusicHouse(msg);
+                }
+            });
         }
     ).catch(console.error);
 }
 
 //歌曲列表
 function musicList(msg) {
-    msgs = '```歌曲列表~\n'
-    for (i = 0; i < songList.length; i++) {
+    msgs = '```歌曲列表~\n1. ' + nowSongName + '\n'
+    for (i = 1; i < songList.length; i++) {
         msgs = msgs + (i + 1) + '. ' + songList[i] + '\n'
     }
     msgs = msgs + '```';
-    msg.channel.send(msgs).then(setTimeout(() => msg.delete(), 10000));
+    msg.channel.send(msgs);
 }
 
 //播歌功能控制台
 function musicMaster(msg) {
-    songMasterMessage = msg.channel.send('```當前播放歌曲~\n' + songList[0] + '\n下一首 | 停止 | 清單```').then(
+    songMasterMessage = msg.channel.send('當前播放歌曲~\n' + nowSongName + '\n下一首 | 停止 | 清單 | 暫停 | 播放').then(
         msg.react('⏩')
     ).then(
         msg.react('⏹️')
     ).then(
         msg.react('📃')
+    ).then(
+        msg.react('⏸️')
+    ).then(
+        msg.react('▶️')
     ).catch(err => {
         console.log('errMusic', err)
     })
 
     const filter = (reaction, user) => {
-        return ['⏩', '⏹️', '📃'].includes(reaction.emoji.name) && user.id === msg.author.id;
+        return ['⏩', '⏹️', '📃', '⏸️', '▶️'].includes(reaction.emoji.name) && user.id === msg.author.id;
     };
 
     const collector = msg.createReactionCollector(filter, { time: 600000 });
@@ -583,8 +601,7 @@ function musicMaster(msg) {
         switch (reaction.emoji.name) {
             case '⏩':
                 if (songList.length != 0) {
-                    nextSongFromMusicMaster = true;
-                    playMusic(msg);
+                    dispatcher.end;
                 } else {
                     msg.reply('沒有下一首了呦')
                 }
@@ -594,6 +611,12 @@ function musicMaster(msg) {
                 break;
             case '📃':
                 musicList(msg);
+                break;
+            case '⏸️':
+                dispatcher.pause();
+                break;
+            case '▶️':
+                dispatcher.resume();
                 break;
         }
     });
