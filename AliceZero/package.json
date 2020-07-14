@@ -8,6 +8,7 @@
     "start": "node alice.js"
   },
   "dependencies": {
+    "@discordjs/opus": "^0.3.2",
     "axios": "^0.19.2",
     "discord.js": "^11.6.4",
     "discord.js-commando": "^0.10.0",

@@ -32,8 +32,8 @@ let botMessage;
 
 //歌單
 let songList = new Array();
-let songListName = new Array();
 let nextSongFromMusicMaster = false;
+let dispatcher;
 //#endregion
 
 //#region 系統功能-修改romValue-前綴字
@@ -185,6 +185,8 @@ async function DoBaseFunction(msg, cmd, args) {
             }
             break;
         case 'test':
+            dispatcher.pause();
+            console.log(dispatcher);
             //msg.channel.send(myEmoji.get('G001'))
             //msg.channel.send("test")
             // .then(message => {
@@ -197,6 +199,9 @@ async function DoBaseFunction(msg, cmd, args) {
             //findPowerFromBaseValue(678615262211211308, 1);
             //client.channels.get('725288853249720402').send('test');
             break;
+        case 'test2':
+            dispatcher.resume();
+            console.log(dispatcher);
         case 's': //傳貼圖
             sendEmoji(msg, args[0]);
             break;
@@ -459,7 +464,35 @@ async function goToMusicHouse(msg, args) {
     if (msg.member.voiceChannel) {
         if (!msg.guild.voiceConnection) {
             addMusicToSongList(args[0]);
-            playMusic(msg);
+            playMusic(msg, (dis) => {
+                dispatcher = dis;
+                dispatcher.on("end", end => {
+                    console.log('end');
+                    msg.member.voiceChannel.leave();
+                    // console.log('end ', nextSongFromMusicMaster);
+                    // console.log('length ', songList.length);
+                    // if (songList.length == 0) {
+                    //     //如果當前狀態是從控制台切歌的話不退出
+                    //     if (nextSongFromMusicMaster) {
+                    //         console.log('1')
+                    //         nextSongFromMusicMaster = false;
+                    //     } else {
+                    //         console.log('2')
+                    //         msg.member.voiceChannel.leave();
+                    //         msg.channel.send('播完歌了呦~');
+                    //     }
+                    // } else {
+                    //     if (nextSongFromMusicMaster) {
+                    //         console.log('3')
+                    //         nextSongFromMusicMaster = false;
+                    //     } else {
+                    //         console.log('4')
+                    //         songListName.shift();
+                    //         playMusic(msg);
+                    //     }
+                    // }
+                })
+            });
             msg.channel.send('來了~').then(
                 msg.delete()
             ).catch(err => console.log(err));
@@ -505,34 +538,15 @@ function sendEmoji(msg, args) {
 
 //添加歌曲進歌單
 async function addMusicToSongList(src) {
-    let stream = await ytdl(src, { filter: 'audioonly' });
-    songList.push(stream);
-    songListName.push(src);
+    songList.push(src);
 }
 
 //播放歌曲
-function playMusic(msg) {
+async function playMusic(msg, callback) {
+    let stream = await ytdl(songList.shift(), { filter: 'audioonly' });
     msg.member.voiceChannel.join().then(
-        async connection => {
-            let dispatcher = connection.playStream(songList.shift());
-            dispatcher.on("end", end => {
-                if (songList.length == 0) {
-                    //如果當前狀態是從控制台切歌的話不退出
-                    if (nextSongFromMusicMaster) {
-                        nextSongFromMusicMaster = false;
-                    } else {
-                        msg.member.voiceChannel.leave();
-                        msg.channel.send('播完歌了呦~');
-                    }
-                } else {
-                    if (nextSongFromMusicMaster) {
-                        nextSongFromMusicMaster = false;
-                    } else {
-                        songListName.shift();
-                        playMusic(msg);
-                    }
-                }
-            })
+        connection => {
+            callback(connection.playStream(stream));
         }
     ).catch(console.error);
 }
@@ -540,16 +554,16 @@ function playMusic(msg) {
 //歌曲列表
 function musicList(msg) {
     msgs = '```歌曲列表~\n'
-    for (i = 0; i < songListName.length; i++) {
-        msgs = msgs + (i + 1) + '. ' + songListName[i] + '\n'
+    for (i = 0; i < songList.length; i++) {
+        msgs = msgs + (i + 1) + '. ' + songList[i] + '\n'
     }
     msgs = msgs + '```';
-    msg.channel.send(msgs);
+    msg.channel.send(msgs).then(setTimeout(() => msg.delete(), 10000));
 }
 
 //播歌功能控制台
 function musicMaster(msg) {
-    songMasterMessage = msg.channel.send('```當前播放歌曲~\n' + songListName[0] + '\n下一首 | 停止 | 清單```').then(
+    songMasterMessage = msg.channel.send('```當前播放歌曲~\n' + songList[0] + '\n下一首 | 停止 | 清單```').then(
         msg.react('⏩')
     ).then(
         msg.react('⏹️')
@@ -570,7 +584,6 @@ function musicMaster(msg) {
             case '⏩':
                 if (songList.length != 0) {
                     nextSongFromMusicMaster = true;
-                    songListName.shift();
                     playMusic(msg);
                 } else {
                     msg.reply('沒有下一首了呦')
