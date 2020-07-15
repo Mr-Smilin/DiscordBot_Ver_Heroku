@@ -61,15 +61,15 @@ client.login(MyToken);
 
 client.on('ready', () => {
     downloading = true; //下載中
-    myDBFunction.getDataFormRanValue(function(value) {
+    myDBFunction.getDataFormRanValue(function (value) {
         if (value) {
             ranValue = value;
         }
-        myDBFunction.getDataFormBotMessage(function(value) {
+        myDBFunction.getDataFormBotMessage(function (value) {
             if (value) {
                 botMessage = value;
             }
-            myDBFunction.getDataFormUserMessage(function(value) {
+            myDBFunction.getDataFormUserMessage(function (value) {
                 if (value) {
                     userMessage = value;
                 }
@@ -173,7 +173,7 @@ function SelectFunctionFromBeforeText(msg, cmd, args = [""]) {
 async function DoBaseFunction(msg, cmd, args) {
     switch (cmd) {
         case 'help':
-            messageManager.HelpMessage(Discord.RichEmbed, function(embed) {
+            messageManager.HelpMessage(Discord.RichEmbed, function (embed) {
                 msg.channel.send(embed);
             })
             break;
@@ -253,7 +253,7 @@ function DoEditRomValue(msg, cmd, args) {
                         nowUseTheEditRomValueChannelID,
                         romValue,
                         ranValue,
-                        function(embed) {
+                        function (embed) {
                             msg.channel.send(embed);
                         });
                     break;
@@ -291,9 +291,9 @@ function DoEditRomValue(msg, cmd, args) {
                                 pushData.push(tempValue); // UserName
                                 tempValue = 'write';
                                 pushData.push(tempValue); // method
-                                myDBFunction.postDataForRanValue(pushData, function() {
+                                myDBFunction.postDataForRanValue(pushData, function () {
                                     downloading = true; //下載中
-                                    myDBFunction.getDataFormRanValue(function(value) {
+                                    myDBFunction.getDataFormRanValue(function (value) {
                                         if (value) {
                                             ranValue = value;
                                         }
@@ -323,7 +323,7 @@ function DoEditRomValue(msg, cmd, args) {
             nowUseTheEditRomValueChannelID,
             romValue,
             ranValue,
-            function(embed) {
+            function (embed) {
                 msg.channel.send(embed);
             });
     }
@@ -340,8 +340,8 @@ function DoRaidersGet(msg, cmd, args) {
                 if (args[1] === undefined) {
                     args[1] = 5;
                 }
-                gasApi.getLevel(args[0], args[1], function(data) {
-                    getLevel(args[0], data, function(msgs) {
+                gasApi.getLevel(args[0], args[1], function (data) {
+                    getLevel(args[0], data, function (msgs) {
                         msg.channel.send(msgs);
                     })
                 })
@@ -349,13 +349,13 @@ function DoRaidersGet(msg, cmd, args) {
 
             break;
         case '技能':
-            gasApi.getSkill(args[1], function(msgs) {
+            gasApi.getSkill(args[1], function (msgs) {
                 msg.channel.send(msgs);
             });
 
             break;
         case '黑特':
-            gasApi.getBlackList(function(msgs) {
+            gasApi.getBlackList(function (msgs) {
                 msg.channel.send(msgs);
             });
 
@@ -366,8 +366,13 @@ function DoRaidersGet(msg, cmd, args) {
 //關鍵字回復
 function DoBotMessageSend(msg, cmd, args) {
     let BTalk;
-    if (args === undefined) BTalk = findBotMessageToATalk(cmd);
-    else BTalk = findBotMessageToATalk(cmd, args);
+    if (args === undefined) BTalk = findUserMessageToATalk(msg, cmd);
+    else BTalk = findUserMessageToATalk(msg, cmd, args);
+
+    if (BTalk.length == 0) {
+        if (args === undefined) BTalk = findBotMessageToATalk(cmd);
+        else BTalk = findBotMessageToATalk(cmd, args);
+    }
 
     if (BTalk !== undefined) {
         if (BTalk.length != 0) {
@@ -407,7 +412,7 @@ function paddingLeft(str, lenght) {
 
 //找根據id找romValue的對應資料
 function findRomValueToID(idName, itemName) {
-    e = romValue.filter(function(item) {
+    e = romValue.filter(function (item) {
         return item.id == idName
     })
     switch (itemName) {
@@ -431,6 +436,27 @@ function findBotMessageToATalk(cmd, status = 1) {
         BTalk = botMessage.filter(item => item.ATalk == cmd);
     } else if (status == 2) {
         BTalk = botMessage.filter(item => cmd.indexOf(item.ATalk) != -1)
+    }
+
+    //如果帶回不只一個json，取得觸發字串最大者
+    if (BTalk !== undefined)
+        if (BTalk.length > 1) {
+            let BTalkLength = new Array;
+            BTalk.forEach(item => BTalkLength.push((item.ATalk).length));
+            BTalkLength = Math.max(...BTalkLength);
+            BTalk = BTalk.find(item => (item.ATalk).length == BTalkLength);
+        }
+
+    return BTalk;
+}
+
+//根據ATalk找userMessage的對應資料
+function findUserMessageToATalk(msg, cmd, status = 1) {
+    let BTalk;
+    if (status == 1) {
+        BTalk = userMessage.filter(item => item.ATalk == cmd && item.targetID == msg.author.id);
+    } else if (status == 2) {
+        BTalk = userMessage.filter(item => cmd.indexOf(item.ATalk) != -1 && item.targetID == msg.author.id)
     }
 
     //如果帶回不只一個json，取得觸發字串最大者
@@ -597,10 +623,8 @@ function musicList(msg) {
 
 //播歌功能控制台
 function musicMaster(msg) {
-    songMasterMessage = msg.channel.send('當前播放歌曲~\n' + nowSongName + '\n下一首 | 停止 | 清單 | 暫停 | 播放').then(
+    songMasterMessage = msg.channel.send('當前播放歌曲~\n' + nowSongName + '\n下一首 | 清單 | 暫停 | 播放').then(
         msg.react('⏩')
-    ).then(
-        msg.react('⏹️')
     ).then(
         msg.react('📃')
     ).then(
