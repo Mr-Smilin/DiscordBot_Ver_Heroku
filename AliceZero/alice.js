@@ -31,6 +31,9 @@ let ranValue;
 //機器人訊息庫
 let botMessage;
 
+//使用者專屬訊息庫
+let userMessage;
+
 //歌單
 let songList = new Array();
 let nowSongName;
@@ -58,16 +61,21 @@ client.login(MyToken);
 
 client.on('ready', () => {
     downloading = true; //下載中
-    myDBFunction.getDataFormRanValue(function (value) {
+    myDBFunction.getDataFormRanValue(function(value) {
         if (value) {
             ranValue = value;
         }
-        myDBFunction.getDataFormBotMessage(function (value) {
+        myDBFunction.getDataFormBotMessage(function(value) {
             if (value) {
                 botMessage = value;
             }
-            console.log(`Logged in as ${client.user.tag}!`);
-            downloading = false; //下載結束
+            myDBFunction.getDataFormUserMessage(function(value) {
+                if (value) {
+                    userMessage = value;
+                }
+                console.log(`Logged in as ${client.user.tag}!`);
+                downloading = false; //下載結束
+            })
         })
     });
 });
@@ -165,7 +173,7 @@ function SelectFunctionFromBeforeText(msg, cmd, args = [""]) {
 async function DoBaseFunction(msg, cmd, args) {
     switch (cmd) {
         case 'help':
-            messageManager.HelpMessage(Discord.RichEmbed, function (embed) {
+            messageManager.HelpMessage(Discord.RichEmbed, function(embed) {
                 msg.channel.send(embed);
             })
             break;
@@ -245,7 +253,7 @@ function DoEditRomValue(msg, cmd, args) {
                         nowUseTheEditRomValueChannelID,
                         romValue,
                         ranValue,
-                        function (embed) {
+                        function(embed) {
                             msg.channel.send(embed);
                         });
                     break;
@@ -283,9 +291,9 @@ function DoEditRomValue(msg, cmd, args) {
                                 pushData.push(tempValue); // UserName
                                 tempValue = 'write';
                                 pushData.push(tempValue); // method
-                                myDBFunction.postDataForRanValue(pushData, function () {
+                                myDBFunction.postDataForRanValue(pushData, function() {
                                     downloading = true; //下載中
-                                    myDBFunction.getDataFormRanValue(function (value) {
+                                    myDBFunction.getDataFormRanValue(function(value) {
                                         if (value) {
                                             ranValue = value;
                                         }
@@ -315,7 +323,7 @@ function DoEditRomValue(msg, cmd, args) {
             nowUseTheEditRomValueChannelID,
             romValue,
             ranValue,
-            function (embed) {
+            function(embed) {
                 msg.channel.send(embed);
             });
     }
@@ -332,8 +340,8 @@ function DoRaidersGet(msg, cmd, args) {
                 if (args[1] === undefined) {
                     args[1] = 5;
                 }
-                gasApi.getLevel(args[0], args[1], function (data) {
-                    getLevel(args[0], data, function (msgs) {
+                gasApi.getLevel(args[0], args[1], function(data) {
+                    getLevel(args[0], data, function(msgs) {
                         msg.channel.send(msgs);
                     })
                 })
@@ -341,13 +349,13 @@ function DoRaidersGet(msg, cmd, args) {
 
             break;
         case '技能':
-            gasApi.getSkill(args[1], function (msgs) {
+            gasApi.getSkill(args[1], function(msgs) {
                 msg.channel.send(msgs);
             });
 
             break;
         case '黑特':
-            gasApi.getBlackList(function (msgs) {
+            gasApi.getBlackList(function(msgs) {
                 msg.channel.send(msgs);
             });
 
@@ -399,7 +407,7 @@ function paddingLeft(str, lenght) {
 
 //找根據id找romValue的對應資料
 function findRomValueToID(idName, itemName) {
-    e = romValue.filter(function (item) {
+    e = romValue.filter(function(item) {
         return item.id == idName
     })
     switch (itemName) {
@@ -472,6 +480,7 @@ async function goToMusicHouse(msg, args) {
 
     let validate = await ytdl.validateURL(args[0]);
     if (!validate) return msg.channel.send('The link is not working.');
+    if (args[0].substring(0, 4) !== 'http') return msg.channel.send('The link is not working.');
 
     if (msg.member.voiceChannel) {
         if (!msg.guild.voiceConnection) {
@@ -496,6 +505,7 @@ async function goToMusicHouse(msg, args) {
 function goBackHomeFromMusicHouse(msg) {
     nowMusicPlayGuild = undefined;
     if (msg.guild.voiceConnection) {
+        nowSongName = undefined;
         msg.guild.voiceConnection.disconnect();
         msg.channel.send('晚安~');
     } else {
@@ -525,6 +535,7 @@ function sendEmoji(msg, args) {
 async function addMusicToOne(msg, args) {
     let validate = await ytdl.validateURL(args[1]);
     if (!validate) return msg.channel.send('The link is not working.');
+    if (args[1].substring(0, 4) !== 'http') return msg.channel.send('The link is not working.');
 
     if (msg.member.voiceChannel) {
         if (!msg.guild.voiceConnection) {
@@ -559,6 +570,7 @@ async function playMusic(msg) {
         connection => {
             dispatcher = connection.playStream(stream, streamOptions);
             dispatcher.on("end", end => {
+                nowSongName = undefined;
                 if (songList.length != 0) {
                     playMusic(msg);
                 } else {
@@ -571,11 +583,15 @@ async function playMusic(msg) {
 
 //歌曲列表
 function musicList(msg) {
-    msgs = '```歌曲列表~\n1. ' + nowSongName + '\n'
-    for (i = 1; i < songList.length; i++) {
-        msgs = msgs + (i + 1) + '. ' + songList[i] + '\n'
+    if (nowSongName === undefined) {
+        msg = '當前沒有歌曲隊列喔!';
+    } else {
+        msgs = '```歌曲列表~\n1. ' + nowSongName + '\n'
+        for (i = 1; i < songList.length; i++) {
+            msgs = msgs + (i + 1) + '. ' + songList[i] + '\n'
+        }
+        msgs = msgs + '```';
     }
-    msgs = msgs + '```';
     msg.channel.send(msgs);
 }
 
@@ -605,7 +621,7 @@ function musicMaster(msg) {
         switch (reaction.emoji.name) {
             case '⏩':
                 if (songList.length != 0) {
-                    dispatcher.end;
+                    dispatcher.end();
                 } else {
                     msg.reply('沒有下一首了呦')
                 }
