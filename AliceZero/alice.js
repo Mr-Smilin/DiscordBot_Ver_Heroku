@@ -18,6 +18,7 @@ const baseValue = require('./jsonHome/baseValue.json');
 const romValue = require('./jsonHome/romValue.json');
 const { exit } = require('process'); //....?
 const { Console } = require('console');
+const { format } = require('path');
 //#endregion
 
 //#region 表單資料
@@ -57,11 +58,11 @@ client.login(MyToken);
 
 client.on('ready', () => {
     downloading = true; //下載中
-    myDBFunction.getDataFormRanValue(function(value) {
+    myDBFunction.getDataFormRanValue(function (value) {
         if (value) {
             ranValue = value;
         }
-        myDBFunction.getDataFormBotMessage(function(value) {
+        myDBFunction.getDataFormBotMessage(function (value) {
             if (value) {
                 botMessage = value;
             }
@@ -164,7 +165,7 @@ function SelectFunctionFromBeforeText(msg, cmd, args = [""]) {
 async function DoBaseFunction(msg, cmd, args) {
     switch (cmd) {
         case 'help':
-            messageManager.HelpMessage(Discord.RichEmbed, function(embed) {
+            messageManager.HelpMessage(Discord.RichEmbed, function (embed) {
                 msg.channel.send(embed);
             })
             break;
@@ -244,7 +245,7 @@ function DoEditRomValue(msg, cmd, args) {
                         nowUseTheEditRomValueChannelID,
                         romValue,
                         ranValue,
-                        function(embed) {
+                        function (embed) {
                             msg.channel.send(embed);
                         });
                     break;
@@ -282,9 +283,9 @@ function DoEditRomValue(msg, cmd, args) {
                                 pushData.push(tempValue); // UserName
                                 tempValue = 'write';
                                 pushData.push(tempValue); // method
-                                myDBFunction.postDataForRanValue(pushData, function() {
+                                myDBFunction.postDataForRanValue(pushData, function () {
                                     downloading = true; //下載中
-                                    myDBFunction.getDataFormRanValue(function(value) {
+                                    myDBFunction.getDataFormRanValue(function (value) {
                                         if (value) {
                                             ranValue = value;
                                         }
@@ -314,7 +315,7 @@ function DoEditRomValue(msg, cmd, args) {
             nowUseTheEditRomValueChannelID,
             romValue,
             ranValue,
-            function(embed) {
+            function (embed) {
                 msg.channel.send(embed);
             });
     }
@@ -331,8 +332,8 @@ function DoRaidersGet(msg, cmd, args) {
                 if (args[1] === undefined) {
                     args[1] = 5;
                 }
-                gasApi.getLevel(args[0], args[1], function(data) {
-                    getLevel(args[0], data, function(msgs) {
+                gasApi.getLevel(args[0], args[1], function (data) {
+                    getLevel(args[0], data, function (msgs) {
                         msg.channel.send(msgs);
                     })
                 })
@@ -340,13 +341,13 @@ function DoRaidersGet(msg, cmd, args) {
 
             break;
         case '技能':
-            gasApi.getSkill(args[1], function(msgs) {
+            gasApi.getSkill(args[1], function (msgs) {
                 msg.channel.send(msgs);
             });
 
             break;
         case '黑特':
-            gasApi.getBlackList(function(msgs) {
+            gasApi.getBlackList(function (msgs) {
                 msg.channel.send(msgs);
             });
 
@@ -398,7 +399,7 @@ function paddingLeft(str, lenght) {
 
 //找根據id找romValue的對應資料
 function findRomValueToID(idName, itemName) {
-    e = romValue.filter(function(item) {
+    e = romValue.filter(function (item) {
         return item.id == idName
     })
     switch (itemName) {
@@ -464,6 +465,8 @@ async function goToMusicHouse(msg, args) {
         case '休息':
             return goBackHomeFromMusicHouse(msg);
         case '先播這個':
+            return addMusicToOne(msg, args);
+        case '先播這首':
             return addMusicToOne(msg, args);
     }
 
@@ -550,10 +553,11 @@ function addMusicToSongList(src) {
 //播放歌曲
 async function playMusic(msg) {
     nowSongName = songList.shift();
+    const streamOptions = { seek: 0, volume: 0.5 };
     let stream = await ytdl(nowSongName, { filter: 'audioonly' });
     msg.member.voiceChannel.join().then(
         connection => {
-            dispatcher = connection.playStream(stream);
+            dispatcher = connection.playStream(stream, streamOptions);
             dispatcher.on("end", end => {
                 if (songList.length != 0) {
                     playMusic(msg);
