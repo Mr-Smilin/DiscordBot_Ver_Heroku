@@ -31,6 +31,14 @@
       "ChannelID": "719892968579792907",
       "ChannelName": "07",
       "Power": ""
+    },
+    {
+      "type": "1",
+      "GroupID": "na",
+      "GroupName": "艾恩葛朗特",
+      "ChannelID": "719379242978377820",
+      "ChannelName": "機廳",
+      "Power": ""
     }
   ],
   "blackUsers": [

@@ -8,7 +8,7 @@
     {
       "id": 1,
       "name": "間隔符",
-      "value": ";",
+      "value": " ",
       "canEdit": 0
     },
     {
@@ -21,6 +21,12 @@
       "id": 3,
       "name": "攻略組表單查詢",
       "value": "攻略組",
+      "canEdit": 1
+    },
+    {
+      "id": 4,
+      "name": "播歌指令",
+      "value": "!",
       "canEdit": 1
     }
   ]
