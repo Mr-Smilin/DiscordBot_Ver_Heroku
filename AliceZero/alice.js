@@ -410,6 +410,28 @@ function DoBotMessageSend(msg, cmd, args) {
 }
 //#endregion
 
+//#region 抓刪
+//抓刪 更新事件
+client.on('messageUpdate', function (oldMessage, newMessage) {
+    if (oldMessage.content !== newMessage.content) {
+        //愛恩葛朗特
+        if (oldMessage.guild.id === '707946293603074108') {
+            str = `事件 更新\n使用者 ${oldMessage.member.user.username}\n群組 ${oldMessage.channel.name}\n舊對話 ${oldMessage.content}\n新對話 ${newMessage.content}\n`;
+            client.channels.get('733348701346725888').send(str);
+        }
+    }
+})
+
+//抓刪 刪除事件
+client.on('messageDelete', message => {
+    //愛恩葛朗特
+    if (message.guild.id === '707946293603074108') {
+        str = `事件 刪除\n使用者 ${message.member.user.username}\n群組 ${message.channel.name}\n刪除內容 ${message.content}\n`;
+        client.channels.get('733348701346725888').send(str);
+    }
+})
+//#endregion
+
 //#region 方法們
 //攻略組轉生點，資料處理
 function getLevel(level, data, callback) {
