@@ -63,15 +63,15 @@ client.login(MyToken);
 client.on('ready', () => {
     downloading = true; //下載中
 
-    myDBFunction.getDataFormRanValue(function (value) {
+    myDBFunction.getDataFormRanValue(function(value) {
         if (value) {
             ranValue = value;
         }
-        myDBFunction.getDataFormBotMessage(function (value) {
+        myDBFunction.getDataFormBotMessage(function(value) {
             if (value) {
                 botMessage = value;
             }
-            myDBFunction.getDataFormUserMessage(function (value) {
+            myDBFunction.getDataFormUserMessage(function(value) {
                 if (value) {
                     userMessage = value;
                 }
@@ -179,7 +179,7 @@ function SelectFunctionFromBeforeText(msg, cmd, args = [""]) {
 async function DoBaseFunction(msg, cmd, args) {
     switch (cmd) {
         case 'help':
-            messageManager.HelpMessage(Discord.RichEmbed, function (embed) {
+            messageManager.HelpMessage(Discord.RichEmbed, function(embed) {
                 msg.channel.send(embed);
             })
             break;
@@ -224,17 +224,17 @@ async function DoBaseFunction(msg, cmd, args) {
             // a = client.channels.get(msg.channel.id).fetchMessages({limit: 100});
             // console.log('a ',a,'\nb ',a.find(item => item.id==='731062385212653700'));
             break;
-        //#region 語音功能(舊)
-        // case 'Alice': //語音功能
-        //     if (nowMusicPlayGuild === msg.guild.id || nowMusicPlayGuild === undefined)
-        //         goToMusicHouse(msg, args);
-        //     else
-        //         msg.channel.send('目前有其他群組正在使用此功能，請稍等喔!')
-        //     break;
-        // case 'Alice休息':
-        //     goBackHomeFromMusicHouse(msg);
-        //     break;
-        //#endregion
+            //#region 語音功能(舊)
+            // case 'Alice': //語音功能
+            //     if (nowMusicPlayGuild === msg.guild.id || nowMusicPlayGuild === undefined)
+            //         goToMusicHouse(msg, args);
+            //     else
+            //         msg.channel.send('目前有其他群組正在使用此功能，請稍等喔!')
+            //     break;
+            // case 'Alice休息':
+            //     goBackHomeFromMusicHouse(msg);
+            //     break;
+            //#endregion
     }
 }
 
@@ -261,7 +261,7 @@ function DoEditRomValue(msg, cmd, args) {
                         nowUseTheEditRomValueChannelID,
                         romValue,
                         ranValue,
-                        function (embed) {
+                        function(embed) {
                             msg.channel.send(embed);
                         });
                     break;
@@ -299,9 +299,9 @@ function DoEditRomValue(msg, cmd, args) {
                                 pushData.push(tempValue); // UserName
                                 tempValue = 'write';
                                 pushData.push(tempValue); // method
-                                myDBFunction.postDataForRanValue(pushData, function () {
+                                myDBFunction.postDataForRanValue(pushData, function() {
                                     downloading = true; //下載中
-                                    myDBFunction.getDataFormRanValue(function (value) {
+                                    myDBFunction.getDataFormRanValue(function(value) {
                                         if (value) {
                                             ranValue = value;
                                         }
@@ -331,7 +331,7 @@ function DoEditRomValue(msg, cmd, args) {
             nowUseTheEditRomValueChannelID,
             romValue,
             ranValue,
-            function (embed) {
+            function(embed) {
                 msg.channel.send(embed);
             });
     }
@@ -348,8 +348,8 @@ function DoRaidersGet(msg, cmd, args) {
                 if (args[1] === undefined) {
                     args[1] = 5;
                 }
-                gasApi.getLevel(args[0], args[1], function (data) {
-                    getLevel(args[0], data, function (msgs) {
+                gasApi.getLevel(args[0], args[1], function(data) {
+                    getLevel(args[0], data, function(msgs) {
                         msg.channel.send(msgs);
                     })
                 })
@@ -357,13 +357,13 @@ function DoRaidersGet(msg, cmd, args) {
 
             break;
         case '技能':
-            gasApi.getSkill(args[1], function (msgs) {
+            gasApi.getSkill(args[0], function(msgs) {
                 msg.channel.send(msgs);
             });
 
             break;
         case '黑特':
-            gasApi.getBlackList(function (msgs) {
+            gasApi.getBlackList(function(msgs) {
                 msg.channel.send(msgs);
             });
 
@@ -412,7 +412,7 @@ function DoBotMessageSend(msg, cmd, args) {
 
 //#region 抓刪
 //抓刪 更新事件
-client.on('messageUpdate', function (oldMessage, newMessage) {
+client.on('messageUpdate', function(oldMessage, newMessage) {
     if (oldMessage.content !== newMessage.content) {
         //愛恩葛朗特
         if (oldMessage.guild.id === '707946293603074108') {
@@ -424,13 +424,13 @@ client.on('messageUpdate', function (oldMessage, newMessage) {
 
 //抓刪 刪除事件
 client.on('messageDelete', message => {
-    //愛恩葛朗特
-    if (message.guild.id === '707946293603074108') {
-        str = `事件 刪除\n使用者 ${message.member.user.username}\n群組 ${message.channel.name}\n刪除內容 ${message.content}\n`;
-        client.channels.get('733348701346725888').send(str);
-    }
-})
-//#endregion
+        //愛恩葛朗特
+        if (message.guild.id === '707946293603074108') {
+            str = `事件 刪除\n使用者 ${message.member.user.username}\n群組 ${message.channel.name}\n刪除內容 ${message.content}\n`;
+            client.channels.get('733348701346725888').send(str);
+        }
+    })
+    //#endregion
 
 //#region 方法們
 //攻略組轉生點，資料處理
@@ -459,7 +459,7 @@ function paddingLeft(str, lenght) {
 
 //找根據id找romValue的對應資料
 function findRomValueToID(idName, itemName) {
-    e = romValue.filter(function (item) {
+    e = romValue.filter(function(item) {
         return item.id == idName
     })
     switch (itemName) {
@@ -644,17 +644,22 @@ async function playMusic(msg) {
     let stream = await ytdl(nowSongName, { filter: 'audioonly' });
     msg.member.voiceChannel.join().then(
         connection => {
-            dispatcher = connection.playStream(stream, streamOptions);
-            dispatcher.on("end", end => {
-                nowSongName = undefined;
-                if (songList.length != 0) {
-                    playMusic(msg);
-                } else {
-                    goBackHomeFromMusicHouse(msg);
-                }
-            });
+            try {
+                dispatcher = connection.playStream(stream, streamOptions);
+                dispatcher.on("end", end => {
+                    nowSongName = undefined;
+                    if (songList.length != 0) {
+                        playMusic(msg);
+                    } else {
+                        goBackHomeFromMusicHouse(msg);
+                    }
+                });
+            } catch {
+                msg.channel.send('播歌期間發生錯誤!\n可能是這首歌小愛不喜歡聽')
+            }
         }
     ).catch(console.error);
+
 }
 
 //歌曲列表
@@ -675,8 +680,7 @@ function musicList(msg) {
 function musicMaster(msg) {
     if (nowSongName === undefined) {
         msg.channel.send('?');
-    }
-    else {
+    } else {
         songMasterMessage = msg.channel.send('當前播放歌曲~\n' + nowSongName + '\n下一首 | 清單 | 暫停 | 播放').then(
             msg.react('⏩')
         ).then(
