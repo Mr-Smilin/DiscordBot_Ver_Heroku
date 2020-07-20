@@ -24,7 +24,7 @@ const skills = {
 //攻略組表單第五頁，黑特單
 const blackList = {
   'method': 'GET',
-  'url': auth.gasUrl.skills,
+  'url': auth.gasUrl.blackList,
   'headers': {
   }
 };
@@ -127,7 +127,7 @@ exports.getSkill = function (name, callback) {
   });
 };
 
-//獲取等級&轉生點
+//獲取黑特
 exports.getBlackList = function (callback) {
   request(blackList, function (error, response) {
     //if (error) throw new Error(error);
@@ -146,6 +146,7 @@ exports.getBlackList = function (callback) {
       let data = JSON.parse(response.body);
       let keys = Object.keys(data);
 
+      console.log(data);
       range = keys.length - 5;
       if (range < 0) {
         range = 0;

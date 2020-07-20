@@ -40,6 +40,7 @@ let songList = new Array();
 let nowSongName;
 let dispatcher;
 let nowMusicPlayGuild = undefined;
+let songInfo = new Array(); //歌曲詳細資訊
 //#endregion
 
 //#region 系統功能-修改romValue-前綴字
@@ -63,15 +64,15 @@ client.login(MyToken);
 client.on('ready', () => {
     downloading = true; //下載中
 
-    myDBFunction.getDataFormRanValue(function(value) {
+    myDBFunction.getDataFormRanValue(function (value) {
         if (value) {
             ranValue = value;
         }
-        myDBFunction.getDataFormBotMessage(function(value) {
+        myDBFunction.getDataFormBotMessage(function (value) {
             if (value) {
                 botMessage = value;
             }
-            myDBFunction.getDataFormUserMessage(function(value) {
+            myDBFunction.getDataFormUserMessage(function (value) {
                 if (value) {
                     userMessage = value;
                 }
@@ -179,7 +180,7 @@ function SelectFunctionFromBeforeText(msg, cmd, args = [""]) {
 async function DoBaseFunction(msg, cmd, args) {
     switch (cmd) {
         case 'help':
-            messageManager.HelpMessage(Discord.RichEmbed, function(embed) {
+            messageManager.HelpMessage(Discord.RichEmbed, function (embed) {
                 msg.channel.send(embed);
             })
             break;
@@ -224,17 +225,17 @@ async function DoBaseFunction(msg, cmd, args) {
             // a = client.channels.get(msg.channel.id).fetchMessages({limit: 100});
             // console.log('a ',a,'\nb ',a.find(item => item.id==='731062385212653700'));
             break;
-            //#region 語音功能(舊)
-            // case 'Alice': //語音功能
-            //     if (nowMusicPlayGuild === msg.guild.id || nowMusicPlayGuild === undefined)
-            //         goToMusicHouse(msg, args);
-            //     else
-            //         msg.channel.send('目前有其他群組正在使用此功能，請稍等喔!')
-            //     break;
-            // case 'Alice休息':
-            //     goBackHomeFromMusicHouse(msg);
-            //     break;
-            //#endregion
+        //#region 語音功能(舊)
+        // case 'Alice': //語音功能
+        //     if (nowMusicPlayGuild === msg.guild.id || nowMusicPlayGuild === undefined)
+        //         goToMusicHouse(msg, args);
+        //     else
+        //         msg.channel.send('目前有其他群組正在使用此功能，請稍等喔!')
+        //     break;
+        // case 'Alice休息':
+        //     goBackHomeFromMusicHouse(msg);
+        //     break;
+        //#endregion
     }
 }
 
@@ -261,7 +262,7 @@ function DoEditRomValue(msg, cmd, args) {
                         nowUseTheEditRomValueChannelID,
                         romValue,
                         ranValue,
-                        function(embed) {
+                        function (embed) {
                             msg.channel.send(embed);
                         });
                     break;
@@ -299,9 +300,9 @@ function DoEditRomValue(msg, cmd, args) {
                                 pushData.push(tempValue); // UserName
                                 tempValue = 'write';
                                 pushData.push(tempValue); // method
-                                myDBFunction.postDataForRanValue(pushData, function() {
+                                myDBFunction.postDataForRanValue(pushData, function () {
                                     downloading = true; //下載中
-                                    myDBFunction.getDataFormRanValue(function(value) {
+                                    myDBFunction.getDataFormRanValue(function (value) {
                                         if (value) {
                                             ranValue = value;
                                         }
@@ -331,7 +332,7 @@ function DoEditRomValue(msg, cmd, args) {
             nowUseTheEditRomValueChannelID,
             romValue,
             ranValue,
-            function(embed) {
+            function (embed) {
                 msg.channel.send(embed);
             });
     }
@@ -348,8 +349,8 @@ function DoRaidersGet(msg, cmd, args) {
                 if (args[1] === undefined) {
                     args[1] = 5;
                 }
-                gasApi.getLevel(args[0], args[1], function(data) {
-                    getLevel(args[0], data, function(msgs) {
+                gasApi.getLevel(args[0], args[1], function (data) {
+                    getLevel(args[0], data, function (msgs) {
                         msg.channel.send(msgs);
                     })
                 })
@@ -357,13 +358,13 @@ function DoRaidersGet(msg, cmd, args) {
 
             break;
         case '技能':
-            gasApi.getSkill(args[0], function(msgs) {
+            gasApi.getSkill(args[0], function (msgs) {
                 msg.channel.send(msgs);
             });
 
             break;
         case '黑特':
-            gasApi.getBlackList(function(msgs) {
+            gasApi.getBlackList(function (msgs) {
                 msg.channel.send(msgs);
             });
 
@@ -412,7 +413,9 @@ function DoBotMessageSend(msg, cmd, args) {
 
 //#region 抓刪
 //抓刪 更新事件
-client.on('messageUpdate', function(oldMessage, newMessage) {
+client.on('messageUpdate', function (oldMessage, newMessage) {
+    if (!oldMessage.guild || !newMessage.guild) return;
+
     if (oldMessage.content !== newMessage.content) {
         //愛恩葛朗特
         if (oldMessage.guild.id === '707946293603074108') {
@@ -424,13 +427,15 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
 
 //抓刪 刪除事件
 client.on('messageDelete', message => {
-        //愛恩葛朗特
-        if (message.guild.id === '707946293603074108') {
-            str = `事件 刪除\n使用者 ${message.member.user.username}\n群組 ${message.channel.name}\n刪除內容 ${message.content}\n`;
-            client.channels.get('733348701346725888').send(str);
-        }
-    })
-    //#endregion
+    if (!message.guild) return;
+
+    //愛恩葛朗特
+    if (message.guild.id === '707946293603074108') {
+        str = `事件 刪除\n使用者 ${message.member.user.username}\n群組 ${message.channel.name}\n刪除內容 ${message.content}\n`;
+        client.channels.get('733348701346725888').send(str);
+    }
+})
+//#endregion
 
 //#region 方法們
 //攻略組轉生點，資料處理
@@ -459,7 +464,7 @@ function paddingLeft(str, lenght) {
 
 //找根據id找romValue的對應資料
 function findRomValueToID(idName, itemName) {
-    e = romValue.filter(function(item) {
+    e = romValue.filter(function (item) {
         return item.id == idName
     })
     switch (itemName) {
@@ -554,24 +559,63 @@ async function goToMusicHouse(msg, cmd, args) {
     }
 
     let validate = await ytdl.validateURL(cmd);
-    if (!validate) return msg.channel.send('The link is not working.');
-    if (cmd.substring(0, 4) !== 'http') return msg.channel.send('The link is not working.');
+    if (!validate) return msg.channel.send('The link is not working.1');
+    if (cmd.substring(0, 4) !== 'http') return msg.channel.send('The link is not working.2');
+    let info = await ytdl.getInfo(cmd);
 
-    if (msg.member.voiceChannel) {
-        if (!msg.guild.voiceConnection) {
-            addMusicToSongList(cmd);
-            playMusic(msg);
-            msg.channel.send('來了~').then(
-                msg.delete()
-            ).catch(err => console.log(err));
+    if (info.videoDetails) {
+        if (msg.member.voiceChannel) {
+            if (!msg.guild.voiceConnection) {
+                addMusicToSongList(cmd);
+                addMusicInfoToSongInfo(info);
+                playMusic(msg);
+                msg.channel.send('來了~').then(
+                    msg.delete()
+                ).catch(err => console.log(err));
+            } else {
+                addMusicToSongList(cmd);
+                addMusicInfoToSongInfo(info);
+                msg.channel.send('已幫你加入歌單~!').then(
+                    msg.delete()
+                ).catch(err => console.log(err));
+            }
         } else {
-            addMusicToSongList(cmd);
-            msg.channel.send('已幫你加入歌單~!').then(
-                msg.delete()
-            ).catch(err => console.log(err));
+            msg.reply('請先進入頻道:3...');
         }
     } else {
-        msg.reply('請先進入頻道:3...');
+        msg.channel.send('The link is not working.3');
+    }
+
+}
+
+//歌曲插播
+async function addMusicToOne(msg, args) {
+    let validate = await ytdl.validateURL(args[0]);
+    if (!validate) return msg.channel.send('The link is not working.1');
+    if (args[0].substring(0, 4) !== 'http') return msg.channel.send('The link is not working.2');
+    let info = await ytdl.getInfo(args[0]);
+
+    if (info.videoDetails) {
+        if (msg.member.voiceChannel) {
+            if (!msg.guild.voiceConnection) {
+                addMusicToSongList(args[0]);
+                addMusicInfoToSongInfo(info);
+                playMusic(msg);
+                msg.channel.send('來了~').then(
+                    msg.delete()
+                ).catch(err => console.log(err));
+            } else {
+                addMusicToSongList(args[0], 2);
+                addMusicInfoToSongInfo(info, 2);
+                msg.channel.send('好的，下一首播這個喔!').then(
+                    msg.delete()
+                ).catch(err => console.log(err));
+            }
+        } else {
+            msg.reply('請先進入頻道:3...');
+        }
+    } else {
+        msg.channel.send('The link is not working.3');
     }
 
 }
@@ -607,46 +651,46 @@ function sendEmoji(msg, args) {
     }
 }
 
-//歌曲插播
-async function addMusicToOne(msg, args) {
-    let validate = await ytdl.validateURL(args[0]);
-    if (!validate) return msg.channel.send('The link is not working.');
-    if (args[0].substring(0, 4) !== 'http') return msg.channel.send('The link is not working.');
-
-    if (msg.member.voiceChannel) {
-        if (!msg.guild.voiceConnection) {
-            addMusicToSongList(args[0]);
-            playMusic(msg);
-            msg.channel.send('來了~').then(
-                msg.delete()
-            ).catch(err => console.log(err));
-        } else {
-            songList.unshift(args[0]);
-            msg.channel.send('好的，下一首播這個喔!').then(
-                msg.delete()
-            ).catch(err => console.log(err));
-        }
-    } else {
-        msg.reply('請先進入頻道:3...');
+//添加歌曲進歌單
+function addMusicToSongList(src, type = 1) {
+    if (type === 1) {
+        songList.push(src);
     }
-
+    else if (type === 2) {
+        songList.unshift(src)
+    }
 }
 
-//添加歌曲進歌單
-function addMusicToSongList(src) {
-    songList.push(src);
+//將歌曲資訊打入陣列
+function addMusicInfoToSongInfo(info, type = 1) {
+    if (info.videoDetails) {
+        if (type === 1) {
+            songInfo.push(info.videoDetails);
+        }
+        else if (type === 2) {
+            if (songInfo.length !== 0) {
+                nowSongInfo = songInfo.shift();
+                songInfo.unshift(info.videoDetails);
+                songInfo.unshift(nowSongInfo);
+            }
+            else {
+                songInfo.unshift(info.videoDetails);
+            }
+        }
+    }
 }
 
 //播放歌曲
 async function playMusic(msg) {
     nowSongName = songList.shift();
     const streamOptions = { seek: 0, volume: 0.5 };
-    let stream = await ytdl(nowSongName, { filter: 'audioonly' });
+    let stream = await ytdl(nowSongName, { filter: 'audioonly', quality: 'highestaudio' });
     msg.member.voiceChannel.join().then(
         connection => {
             try {
                 dispatcher = connection.playStream(stream, streamOptions);
                 dispatcher.on("end", end => {
+                    songInfo.shift(); //將最舊的歌曲資訊清出
                     nowSongName = undefined;
                     if (songList.length != 0) {
                         playMusic(msg);
@@ -658,8 +702,16 @@ async function playMusic(msg) {
                 msg.channel.send('播歌期間發生錯誤!\n可能是這首歌小愛不喜歡聽')
             }
         }
-    ).catch(console.error);
-
+    ).catch(err => {
+        console.log(err, ' songErr');
+        console.log('播歌期間發生錯誤');
+        nowSongName = undefined;
+        if (songList.length != 0) {
+            playMusic(msg);
+        } else {
+            goBackHomeFromMusicHouse(msg);
+        }
+    });
 }
 
 //歌曲列表
@@ -667,9 +719,9 @@ function musicList(msg) {
     if (nowSongName === undefined) {
         msg = '當前沒有歌曲隊列喔!';
     } else {
-        msgs = '```歌曲列表~\n1. ' + nowSongName + '\n'
-        for (i = 1; i < songList.length; i++) {
-            msgs = msgs + (i + 1) + '. ' + songList[i] + '\n'
+        msgs = '```歌曲列表~\n'
+        for (i = 0; i < songInfo.length; i++) {
+            msgs = msgs + (i + 1) + '. ' + songInfo[i].title + '\n'
         }
         msgs = msgs + '```';
     }
@@ -700,26 +752,31 @@ function musicMaster(msg) {
         const collector = msg.createReactionCollector(filter, { time: 600000 });
 
         collector.on('collect', (reaction, user) => {
-            switch (reaction.emoji.name) {
-                case '⏩':
-                    if (songList.length != 0) {
-                        dispatcher.end();
-                    } else {
-                        msg.reply('沒有下一首了呦')
-                    }
-                    break;
-                case '⏹️':
-                    goBackHomeFromMusicHouse(msg);
-                    break;
-                case '📃':
-                    musicList(msg);
-                    break;
-                case '⏸️':
-                    dispatcher.pause();
-                    break;
-                case '▶️':
-                    dispatcher.resume();
-                    break;
+            if (dispatcher !== undefined) {
+                switch (reaction.emoji.name) {
+                    case '⏩':
+                        if (songList.length != 0) {
+                            dispatcher.end();
+                        } else {
+                            msg.reply('沒有下一首了呦')
+                        }
+                        break;
+                    case '⏹️':
+                        goBackHomeFromMusicHouse(msg);
+                        break;
+                    case '📃':
+                        musicList(msg);
+                        break;
+                    case '⏸️':
+                        dispatcher.pause();
+                        break;
+                    case '▶️':
+                        dispatcher.resume();
+                        break;
+                }
+            }
+            else {
+                msg.channel.send('The song will ready,please wait seconds for again.')
             }
         });
         collector.on('end', collected => {
