@@ -64,15 +64,15 @@ client.login(MyToken);
 client.on('ready', () => {
     downloading = true; //下載中
 
-    myDBFunction.getDataFormRanValue(function (value) {
+    myDBFunction.getDataFormRanValue(function(value) {
         if (value) {
             ranValue = value;
         }
-        myDBFunction.getDataFormBotMessage(function (value) {
+        myDBFunction.getDataFormBotMessage(function(value) {
             if (value) {
                 botMessage = value;
             }
-            myDBFunction.getDataFormUserMessage(function (value) {
+            myDBFunction.getDataFormUserMessage(function(value) {
                 if (value) {
                     userMessage = value;
                 }
@@ -180,7 +180,7 @@ function SelectFunctionFromBeforeText(msg, cmd, args = [""]) {
 async function DoBaseFunction(msg, cmd, args) {
     switch (cmd) {
         case 'help':
-            messageManager.HelpMessage(Discord.RichEmbed, function (embed) {
+            messageManager.HelpMessage(Discord.RichEmbed, function(embed) {
                 msg.channel.send(embed);
             })
             break;
@@ -225,17 +225,17 @@ async function DoBaseFunction(msg, cmd, args) {
             // a = client.channels.get(msg.channel.id).fetchMessages({limit: 100});
             // console.log('a ',a,'\nb ',a.find(item => item.id==='731062385212653700'));
             break;
-        //#region 語音功能(舊)
-        // case 'Alice': //語音功能
-        //     if (nowMusicPlayGuild === msg.guild.id || nowMusicPlayGuild === undefined)
-        //         goToMusicHouse(msg, args);
-        //     else
-        //         msg.channel.send('目前有其他群組正在使用此功能，請稍等喔!')
-        //     break;
-        // case 'Alice休息':
-        //     goBackHomeFromMusicHouse(msg);
-        //     break;
-        //#endregion
+            //#region 語音功能(舊)
+            // case 'Alice': //語音功能
+            //     if (nowMusicPlayGuild === msg.guild.id || nowMusicPlayGuild === undefined)
+            //         goToMusicHouse(msg, args);
+            //     else
+            //         msg.channel.send('目前有其他群組正在使用此功能，請稍等喔!')
+            //     break;
+            // case 'Alice休息':
+            //     goBackHomeFromMusicHouse(msg);
+            //     break;
+            //#endregion
     }
 }
 
@@ -262,7 +262,7 @@ function DoEditRomValue(msg, cmd, args) {
                         nowUseTheEditRomValueChannelID,
                         romValue,
                         ranValue,
-                        function (embed) {
+                        function(embed) {
                             msg.channel.send(embed);
                         });
                     break;
@@ -300,9 +300,9 @@ function DoEditRomValue(msg, cmd, args) {
                                 pushData.push(tempValue); // UserName
                                 tempValue = 'write';
                                 pushData.push(tempValue); // method
-                                myDBFunction.postDataForRanValue(pushData, function () {
+                                myDBFunction.postDataForRanValue(pushData, function() {
                                     downloading = true; //下載中
-                                    myDBFunction.getDataFormRanValue(function (value) {
+                                    myDBFunction.getDataFormRanValue(function(value) {
                                         if (value) {
                                             ranValue = value;
                                         }
@@ -332,7 +332,7 @@ function DoEditRomValue(msg, cmd, args) {
             nowUseTheEditRomValueChannelID,
             romValue,
             ranValue,
-            function (embed) {
+            function(embed) {
                 msg.channel.send(embed);
             });
     }
@@ -342,32 +342,13 @@ function DoEditRomValue(msg, cmd, args) {
 function DoRaidersGet(msg, cmd, args) {
     switch (cmd) {
         case '轉生點': //轉生點查詢
-            if (args[0] === undefined || args[0] === '' || args[1] === '' || args[0] > 100 || args[0] < 1 || args[1] > 10 || args[1] < 1 || isNaN(args[0]) === true || (isNaN(args[1]) === true && args[1] !== undefined)) {
-                msgs = '```轉生點查詢\n語法:攻略組 轉生點 {等級} [範圍]\n\n從選擇等級開始查詢，根據範圍返還查詢數量\n\n等級不可低於1，不可大於100\n範圍不可低於1，不可大於10(預設5)```'
-                msg.channel.send(msgs);
-            } else {
-                if (args[1] === undefined) {
-                    args[1] = 5;
-                }
-                gasApi.getLevel(args[0], args[1], function (data) {
-                    getLevel(args[0], data, function (msgs) {
-                        msg.channel.send(msgs);
-                    })
-                })
-            }
-
+            LevelFunction(msg, cmd, args);
             break;
         case '技能':
-            gasApi.getSkill(args[0], function (msgs) {
-                msg.channel.send(msgs);
-            });
-
+            SkillFunction(msg, cmd, args);
             break;
         case '黑特':
-            gasApi.getBlackList(function (msgs) {
-                msg.channel.send(msgs);
-            });
-
+            BlackListFunction(msg, cmd, args);
             break;
     }
 }
@@ -413,7 +394,7 @@ function DoBotMessageSend(msg, cmd, args) {
 
 //#region 抓刪
 //抓刪 更新事件
-client.on('messageUpdate', function (oldMessage, newMessage) {
+client.on('messageUpdate', function(oldMessage, newMessage) {
     if (!oldMessage.guild || !newMessage.guild) return;
 
     if (oldMessage.content !== newMessage.content) {
@@ -427,17 +408,38 @@ client.on('messageUpdate', function (oldMessage, newMessage) {
 
 //抓刪 刪除事件
 client.on('messageDelete', message => {
-    if (!message.guild) return;
+        if (!message.guild) return;
 
-    //愛恩葛朗特
-    if (message.guild.id === '707946293603074108') {
-        str = `事件 刪除\n使用者 ${message.member.user.username}\n群組 ${message.channel.name}\n刪除內容 ${message.content}\n`;
-        client.channels.get('733348701346725888').send(str);
-    }
-})
-//#endregion
+        //愛恩葛朗特
+        if (message.guild.id === '707946293603074108') {
+            str = `事件 刪除\n使用者 ${message.member.user.username}\n群組 ${message.channel.name}\n刪除內容 ${message.content}\n`;
+            client.channels.get('733348701346725888').send(str);
+        }
+    })
+    //#endregion
 
 //#region 方法們
+
+//#region 攻略組
+
+//轉生點
+function LevelFunction(msg, cmd, args) {
+    if (args[0] === undefined || args[0] === '' || args[1] === '' || args[0] > 100 || args[0] < 1 || args[1] > 10 || args[1] < 1 || isNaN(args[0]) === true || (isNaN(args[1]) === true && args[1] !== undefined)) {
+        msgs = '```轉生點查詢\n語法:攻略組 轉生點 {等級} [範圍]\n\n從選擇等級開始查詢，根據範圍返還查詢數量\n\n等級不可低於1，不可大於100\n範圍不可低於1，不可大於10(預設5)```'
+        msg.channel.send(msgs);
+    } else {
+        //範圍預設5
+        if (args[1] === undefined) {
+            args[1] = 5;
+        }
+        gasApi.getLevel(args[0], args[1], function(data) {
+            getLevel(args[0], data, function(msgs) {
+                msg.channel.send(msgs);
+            })
+        })
+    }
+}
+
 //攻略組轉生點，資料處理
 function getLevel(level, data, callback) {
     let j = parseFloat(level);
@@ -454,17 +456,24 @@ function getLevel(level, data, callback) {
     callback(msgs);
 }
 
-//字串補空白
-function paddingLeft(str, lenght) {
-    if (str.length >= lenght)
-        return str;
-    else
-        return paddingLeft(" " + str, lenght);
+//技能
+function SkillFunction(msg, cmd, args) {
+    gasApi.getSkill(args[0], function(msgs) {
+        msg.channel.send(msgs);
+    });
 }
+
+//黑特
+function BlackListFunction(msg, cmd, args) {
+    gasApi.getBlackList(function(msgs) {
+        msg.channel.send(msgs);
+    });
+}
+//#endregion
 
 //找根據id找romValue的對應資料
 function findRomValueToID(idName, itemName) {
-    e = romValue.filter(function (item) {
+    e = romValue.filter(function(item) {
         return item.id == idName
     })
     switch (itemName) {
@@ -523,27 +532,25 @@ function findUserMessageToATalk(msg, cmd, status = 1) {
     return BTalk;
 }
 
-//權限判斷 預設判斷群組id
-function findPowerFromBaseValue(msg, temp) {
-    let a = baseValue.Power.find(item => item.ChannelID == msg.channel.id && item.Power.indexOf(temp) != -1);
-    if (a !== undefined) temp = -1;
-    else if (baseValue.Power.find(item => item.ChannelID == msg.channel.id) === undefined) {
-        a = baseValue.Power.find(item => item.GroupID == msg.guild.id && item.Power.indexOf(temp) != -1);
-        if (a !== undefined) temp = -1;
+//傳送貼圖
+function sendEmoji(msg, args) {
+    a = client.emojis.find(emoji => emoji.name === args);
+    if (a === undefined || a === null) {
+        msg.channel.send('Alice cant find this emoji').then(data => {
+            msg.delete();
+            setTimeout(data.delete(), 2000);
+        })
+    } else if (a.animated) {
+        msg.channel.send('this emoji is animated').then(data => {
+            msg.delete();
+            setTimeout(data.delete(), 2000);
+        })
+    } else {
+        msg.channel.send(`<:${a.name}:${a.id}>`).then(data => msg.delete())
     }
-    return temp;
 }
 
-//正則判斷 有奇怪符號的都給我出去
-function DeleteTempIfHaveEx(msg, temp) {
-    let tempValue = temp;
-    if (msg.substring(0, 4) !== 'http') {
-        const t = /\!|\@|\:/;
-        if (t.test(msg)) tempValue = -1;
-    }
-    return tempValue;
-}
-
+//#region 播歌類方法
 //進語音房播歌
 async function goToMusicHouse(msg, cmd, args) {
     nowMusicPlayGuild = msg.guild.id;
@@ -633,30 +640,11 @@ function goBackHomeFromMusicHouse(msg) {
     }
 }
 
-//傳送貼圖
-function sendEmoji(msg, args) {
-    a = client.emojis.find(emoji => emoji.name === args);
-    if (a === undefined || a === null) {
-        msg.channel.send('Alice cant find this emoji').then(data => {
-            msg.delete();
-            setTimeout(data.delete(), 2000);
-        })
-    } else if (a.animated) {
-        msg.channel.send('this emoji is animated').then(data => {
-            msg.delete();
-            setTimeout(data.delete(), 2000);
-        })
-    } else {
-        msg.channel.send(`<:${a.name}:${a.id}>`).then(data => msg.delete())
-    }
-}
-
 //添加歌曲進歌單
 function addMusicToSongList(src, type = 1) {
     if (type === 1) {
         songList.push(src);
-    }
-    else if (type === 2) {
+    } else if (type === 2) {
         songList.unshift(src)
     }
 }
@@ -666,14 +654,12 @@ function addMusicInfoToSongInfo(info, type = 1) {
     if (info.videoDetails) {
         if (type === 1) {
             songInfo.push(info.videoDetails);
-        }
-        else if (type === 2) {
+        } else if (type === 2) {
             if (songInfo.length !== 0) {
                 nowSongInfo = songInfo.shift();
                 songInfo.unshift(info.videoDetails);
                 songInfo.unshift(nowSongInfo);
-            }
-            else {
+            } else {
                 songInfo.unshift(info.videoDetails);
             }
         }
@@ -774,8 +760,7 @@ function musicMaster(msg) {
                         dispatcher.resume();
                         break;
                 }
-            }
-            else {
+            } else {
                 msg.channel.send('The song will ready,please wait seconds for again.')
             }
         });
@@ -783,6 +768,29 @@ function musicMaster(msg) {
             console.log(`Collected ${collected.size} items`);
         });
     }
+}
+//#endregion
+
+//#region 小/基本功能
+//權限判斷 預設判斷群組id
+function findPowerFromBaseValue(msg, temp) {
+    let a = baseValue.Power.find(item => item.ChannelID == msg.channel.id && item.Power.indexOf(temp) != -1);
+    if (a !== undefined) temp = -1;
+    else if (baseValue.Power.find(item => item.ChannelID == msg.channel.id) === undefined) {
+        a = baseValue.Power.find(item => item.GroupID == msg.guild.id && item.Power.indexOf(temp) != -1);
+        if (a !== undefined) temp = -1;
+    }
+    return temp;
+}
+
+//正則判斷 有奇怪符號的都給我出去
+function DeleteTempIfHaveEx(msg, temp) {
+    let tempValue = temp;
+    if (msg.substring(0, 4) !== 'http') {
+        const t = /\!|\@|\:/;
+        if (t.test(msg)) tempValue = -1;
+    }
+    return tempValue;
 }
 
 //參數替換
@@ -795,5 +803,14 @@ function valueChange(message, msg) {
 
     return message;
 }
+
+//字串補空白
+function paddingLeft(str, lenght) {
+    if (str.length >= lenght)
+        return str;
+    else
+        return paddingLeft(" " + str, lenght);
+}
+//#endregion
 
 //#endregion
