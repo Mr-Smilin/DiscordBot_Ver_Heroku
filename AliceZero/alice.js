@@ -633,6 +633,7 @@ function goBackHomeFromMusicHouse(msg) {
     if (msg.guild.voiceConnection) {
         nowSongName = undefined;
         songList = new Array();
+        songInfo = new Array();
         msg.guild.voiceConnection.disconnect();
         msg.channel.send('晚安~');
     } else {
