@@ -25,7 +25,7 @@ exports.HelpMessage = function(RichEmbed, callback) {
             .addField('查詢攻略組們努力製作的表單', '神聖術語 攻略組', )
             .addField('轉生點 {等級} [範圍]', '查詢各等級的轉生點', true)
             .addField('技能 {角色名稱}', '查詢各角色的持有技能', true)
-            .addField('黑特', '查詢黑鐵宮名單', true)
+            .addField('黑特 [名稱]', '查詢黑鐵宮名單', true)
             .addField('\u200B', '\u200B')
             .addField('以上是目前小愛開放的指令', '除此以外..')
             .addField('回答', '有時會在大家聊天時回應大家的話', true)

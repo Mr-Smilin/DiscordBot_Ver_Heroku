@@ -17,9 +17,6 @@ const auth = require('./jsonHome/auth.json');
 const baseValue = require('./jsonHome/baseValue.json');
 const romValue = require('./jsonHome/romValue.json');
 const { exit } = require('process'); //....?
-const { Console } = require('console');
-const { format } = require('path');
-const { isArray } = require('util');
 //#endregion
 
 //#region 表單資料
@@ -213,6 +210,7 @@ async function DoBaseFunction(msg, cmd, args) {
             //  })
             //findPowerFromBaseValue(678615262211211308, 1);
             //client.channels.get('725288853249720402').send('test');
+            //gasApi.getMileage(msg => {});
             break;
         case 'test2':
             break;
@@ -464,13 +462,90 @@ function SkillFunction(msg, cmd, args) {
 }
 
 //黑特
-function BlackListFunction(msg, cmd, args) {
-    gasApi.getBlackList(function(msgs) {
-        msg.channel.send(msgs);
+function BlackListFunction(msgA, cmd, args) {
+    gasApi.getBlackList(function(msgData) {
+        let many = 4; //一次顯示幾筆
+        let i = 0;
+        let msgs = '```';
+        if (args[0].trim() != '') {
+            for (i; i <= msgData.length - 1; i++) {
+                if (msgData[i].indexOf(args[0]) != -1) {
+                    msgA.channel.send('```' + msgData[i] + '```')
+                    break;
+                }
+            }
+            if (i == msgData.length) {
+                //沒資料就走原內容
+                BlackListFunction(msgA, cmd, [''])
+            }
+        } else {
+            for (i; i < many; i++) {
+                msgs = msgs + msgData[i];
+            }
+            i = 0;
+            msgs = msgs + '1/' + Math.ceil(msgData.length / many) + '頁```';
+            msgA.channel.send(msgs)
+                .then(msg => {
+                    msg.react("⏪")
+                        .then(msg.react("⏩"))
+                    const filter = (reaction, user) => {
+                        return ['⏩', '⏪'].includes(reaction.emoji.name) && user.id === msgA.author.id;
+                    };
+
+                    const collector = msg.createReactionCollector(filter, { time: 600000 });
+
+                    collector.on('collect', (reaction, user) => {
+                        switch (reaction.emoji.name) {
+                            case '⏩':
+                                if (i >= msgData.length - 1 - many) {
+                                    msg.channel.send('後面就沒有了喔~~')
+                                        .then(msg => {
+                                            setTimeout(() => {
+                                                msg.delete();
+                                            }, 5000);
+                                        })
+                                } else {
+                                    i = i + many;
+                                    EditBlackList(i, msgData, msg, many);
+                                }
+                                break;
+                            case '⏪':
+                                if (i <= 0) {
+                                    msg.channel.send('這邊是開頭喔!')
+                                        .then(msg => {
+                                            setTimeout(() => {
+                                                msg.delete();
+                                            }, 5000);
+                                        })
+                                } else {
+                                    i = i - many;
+                                    EditBlackList(i, msgData, msg, many);
+                                }
+                                break;
+                        }
+                    })
+                })
+
+        }
     });
+}
+
+//編輯黑特訊息
+function EditBlackList(temp, msgData, msg, many) {
+    let message = '```';
+    let maxL = many;
+    if (msgData.length - temp < many) {
+        maxL = msgData.length - temp
+    }
+    for (i = temp; i < temp + maxL; i++) {
+        message = message + msgData[i];
+    }
+    message = message + `${temp/many+1}/${Math.ceil(msgData.length/many)}頁` + '```';
+    msg.edit(message);
 }
 //#endregion
 
+//#region 找資料
 //找根據id找romValue的對應資料
 function findRomValueToID(idName, itemName) {
     e = romValue.filter(function(item) {
@@ -549,6 +624,7 @@ function sendEmoji(msg, args) {
         msg.channel.send(`<:${a.name}:${a.id}>`).then(data => msg.delete())
     }
 }
+//#endregion
 
 //#region 播歌類方法
 //進語音房播歌
