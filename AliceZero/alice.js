@@ -210,7 +210,12 @@ async function DoBaseFunction(msg, cmd, args) {
             //  })
             //findPowerFromBaseValue(678615262211211308, 1);
             //client.channels.get('725288853249720402').send('test');
-            //gasApi.getMileage(msg => {});
+            msg.channel.send('test')
+                .then(msg => {
+                    msg.react('zero');
+                    msg.react('one');
+                    msg.react('🔟');
+                })
             break;
         case 'test2':
             break;
@@ -347,6 +352,9 @@ function DoRaidersGet(msg, cmd, args) {
             break;
         case '黑特':
             BlackListFunction(msg, cmd, args);
+            break;
+        case '成就':
+            MileageFunction(msg, cmd, args);
             break;
     }
 }
@@ -542,6 +550,50 @@ function EditBlackList(temp, msgData, msg, many) {
     }
     message = message + `${temp/many+1}/${Math.ceil(msgData.length/many)}頁` + '```';
     msg.edit(message);
+}
+
+//成就
+function MileageFunction(msgA, cmd, args) {
+    gasApi.getMileage(function(msgData) {
+        if (typeof(msgData) == 'string') {
+            msgA.channel.send(msgData);
+        } else if (typeof(msgData) == 'object') {
+            let texture = ['🔟', '🇦', '🇧', '🇨', '🇩', '🇪', '🇫', '🇬', '🇭', '🇮', '🇯']
+            let str = '';
+            for (i = 1; i < msgData.length; i++) {
+                str = str + msgData[i][0].MyIDName + ' 請點選 ' + texture[i] + '\n\n';
+            }
+            msgA.channel.send('```成就\n\n請根據貼圖選擇要查看的分類~\n\n' + str + '```')
+                .then(msg => {
+                    for (i = 1; i < msgData.length; i++) {
+                        if (msgData[i] != undefined) {
+                            if (msgData[i].length != 0) {
+                                msg.react(texture[i])
+                            }
+                        }
+                    }
+                    const filter = (reaction, user) => {
+                        return texture.includes(reaction.emoji.name) && user.id === msgA.author.id;
+                    };
+
+                    const collector = msg.createReactionCollector(filter, { time: 600000 });
+
+                    collector.on('collect', (reaction, user) => {
+                        const j = texture.indexOf(reaction.emoji.name);
+                        const selectData = msgData[j];
+                        let str = '```' + selectData[0].MyIDName + '\n\n';
+                        for (i = 0; i < selectData.length; i++) {
+                            str = `${str}條件名稱 ${selectData[i].Answer}\n獲得點數 ${selectData[i].Point}\n不同角色可否累積 ${selectData[i].Repeat}\n\n`;
+                        }
+                        str = str + '```';
+                        msg.channel.send(str);
+                    })
+                })
+                .catch(err => {
+                    console.log('errMileage', err)
+                })
+        }
+    })
 }
 //#endregion
 
@@ -851,11 +903,13 @@ function musicMaster(msg) {
 //#region 小/基本功能
 //權限判斷 預設判斷群組id
 function findPowerFromBaseValue(msg, temp) {
-    let a = baseValue.Power.find(item => item.ChannelID == msg.channel.id && item.Power.indexOf(temp) != -1);
-    if (a !== undefined) temp = -1;
-    else if (baseValue.Power.find(item => item.ChannelID == msg.channel.id) === undefined) {
-        a = baseValue.Power.find(item => item.GroupID == msg.guild.id && item.Power.indexOf(temp) != -1);
+    if (msg.author.id !== '165753385385984000') { //作者不受系統權限影響
+        let a = baseValue.Power.find(item => item.ChannelID == msg.channel.id && item.Power.indexOf(temp) != -1);
         if (a !== undefined) temp = -1;
+        else if (baseValue.Power.find(item => item.ChannelID == msg.channel.id) === undefined) {
+            a = baseValue.Power.find(item => item.GroupID == msg.guild.id && item.Power.indexOf(temp) != -1);
+            if (a !== undefined) temp = -1;
+        }
     }
     return temp;
 }

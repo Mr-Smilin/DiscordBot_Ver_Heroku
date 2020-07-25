@@ -160,31 +160,28 @@ exports.getBlackList = function(callback) {
 
 //獲取成就表
 exports.getMileage = function(callback) {
-    let returnMessage = '';
     request(mileage, function(error, response) {
         //if (error) throw new Error(error);
         if (error) {
             callback(error);
         } else {
             if (response.body !== undefined && typeof(response.body) === 'string') {
-                if (response.body.substring(0, 1) !== '{') {
+                if (response.body.substring(0, 1) !== '[') {
                     callback('出現意外錯誤~\n通常是google不開心了');
                 }
             } else {
                 callback('出現意外錯誤~\n通常是google不開心了');
             }
             let data = JSON.parse(response.body);
-            let keys = Object.keys(data);
 
-            console.log(data, ' data');
-            console.log(keys, ' key');
-            // let msgData = new Array;
-            // for (var i = 0; i < keys.length; i++) {
-            //     if (data[i] !== undefined) {
-            //         msgData.push(`暱稱 ${data[i].name}\n觀察狀態 ${data[i].type}\n主動殺人次數 ${data[i].count}\n備註 ${data[i].backup}\n\n`);
-            //     }
-            // }
-            callback('');
+            let returnData = new Array;
+            for (i = 0; i < data.length; i++) {
+                if (returnData[data[i].MyID] == undefined) {
+                    returnData[data[i].MyID] = new Array;
+                }
+                returnData[data[i].MyID].push(data[i]);
+            }
+            callback(returnData);
         }
     });
 };
