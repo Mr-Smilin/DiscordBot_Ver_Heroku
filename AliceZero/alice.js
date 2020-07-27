@@ -210,12 +210,7 @@ async function DoBaseFunction(msg, cmd, args) {
             //  })
             //findPowerFromBaseValue(678615262211211308, 1);
             //client.channels.get('725288853249720402').send('test');
-            msg.channel.send('test')
-                .then(msg => {
-                    msg.react('zero');
-                    msg.react('one');
-                    msg.react('🔟');
-                })
+            gasApi.getCatImage(test => {});
             break;
         case 'test2':
             break;
@@ -228,17 +223,9 @@ async function DoBaseFunction(msg, cmd, args) {
             // a = client.channels.get(msg.channel.id).fetchMessages({limit: 100});
             // console.log('a ',a,'\nb ',a.find(item => item.id==='731062385212653700'));
             break;
-            //#region 語音功能(舊)
-            // case 'Alice': //語音功能
-            //     if (nowMusicPlayGuild === msg.guild.id || nowMusicPlayGuild === undefined)
-            //         goToMusicHouse(msg, args);
-            //     else
-            //         msg.channel.send('目前有其他群組正在使用此功能，請稍等喔!')
-            //     break;
-            // case 'Alice休息':
-            //     goBackHomeFromMusicHouse(msg);
-            //     break;
-            //#endregion
+        case '貓':
+            getCatImage(msg);
+            break;
     }
 }
 
@@ -675,6 +662,25 @@ function sendEmoji(msg, args) {
     } else {
         msg.channel.send(`<:${a.name}:${a.id}>`).then(data => msg.delete())
     }
+}
+
+//貓圖
+function getCatImage(msg) {
+    gasApi.getCatImage(url => {
+        if (url.substring(0, 4) != 'http') {
+            msg.channel.send(url);
+        } else {
+            const avatar = {
+                files: [{
+                    attachment: url,
+                    name: 'cat.jpg'
+                }]
+            };
+            if (avatar.files) {
+                msg.channel.send('', avatar);
+            }
+        }
+    });
 }
 //#endregion
 

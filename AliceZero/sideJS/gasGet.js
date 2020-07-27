@@ -189,6 +189,33 @@ exports.getMileage = function(callback) {
 
 //#endregion 攻略組表單相關END
 
+//#region 圖床相關
+
+//#region 請求宣告
+const catImage = {
+    'method': 'GET',
+    'url': `https://api.imgur.com/3/album/${auth.imgur.catImage}/images`,
+    'headers': { 'Authorization': 'Bearer ' + auth.imgur.token }
+};
+//#endregion
+
+//#region 實作
+exports.getCatImage = function(callback) {
+    request(catImage, function(error, response) {
+        if (error) throw new Error(error);
+        catImageData = JSON.parse(response.body);
+        if (catImageData.status == 200) {
+            const imageID = Math.floor(Math.random() * Math.floor(catImageData.data.length));
+            callback(catImageData.data[imageID].link);
+        } else {
+            callback('出現錯誤!如果問題持續存在，請通知作者');
+        }
+    });
+};
+//#endregion
+
+//#endregion
+
 //#region 字串補空白
 function paddingRightForCn(str, lenght) {
     if (str.length >= lenght)

@@ -14,6 +14,7 @@ exports.HelpMessage = function(RichEmbed, callback) {
             .addField('\u200B', '\u200B')
             .addField('系統命令', '神聖術語 ~')
             .addField('help', '幫助指令', true)
+            .addField('貓', '貓咪', true)
             .addField('s {貼圖編號}', '根據編號反饋貼圖(如果小愛有的話)', true)
             .addField('\u200B', '\u200B')
             .addField('請小愛播放歌曲', '神聖術語 !', )
