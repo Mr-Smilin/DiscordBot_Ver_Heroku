@@ -1,53 +1,50 @@
 {
-  "Power": [
-    {
-      "type": "1",
-      "GroupID": "678615262211211308",
-      "GroupName": "石頭's Server",
-      "ChannelID": "na",
-      "ChannelName": "測試區",
-      "Power": "012349"
-    },
-    {
-      "type": "1",
-      "GroupID": "na",
-      "GroupName": "石頭's Server",
-      "ChannelID": "725288853249720402",
-      "ChannelName": "測試區",
-      "Power": ""
-    },
-    {
-      "type": "1",
-      "GroupID": "707946293603074108",
-      "GroupName": "艾恩葛朗特",
-      "ChannelID": "na",
-      "ChannelName": "na",
-      "Power": "012349"
-    },
-    {
-      "type": "1",
-      "GroupID": "na",
-      "GroupName": "艾恩葛朗特",
-      "ChannelID": "719892968579792907",
-      "ChannelName": "07",
-      "Power": ""
-    },
-    {
-      "type": "1",
-      "GroupID": "na",
-      "GroupName": "艾恩葛朗特",
-      "ChannelID": "719379242978377820",
-      "ChannelName": "機廳",
-      "Power": ""
-    }
-  ],
-  "blackUsers": [
-    {
-      "id": "0",
-      "userID": "1",
-      "userName": "2",
-      "userPower": "3",
-      "backUp": "4"
-    }
-  ]
+    "Power": [{
+            "type": "1",
+            "GroupID": "678615262211211308",
+            "GroupName": "石頭's Server",
+            "ChannelID": "na",
+            "ChannelName": "測試區",
+            "Power": "012349"
+        },
+        {
+            "type": "1",
+            "GroupID": "na",
+            "GroupName": "石頭's Server",
+            "ChannelID": "725288853249720402",
+            "ChannelName": "測試區",
+            "Power": ""
+        },
+        {
+            "type": "1",
+            "GroupID": "707946293603074108",
+            "GroupName": "艾恩葛朗特",
+            "ChannelID": "na",
+            "ChannelName": "na",
+            "Power": "012349"
+        },
+        {
+            "type": "1",
+            "GroupID": "na",
+            "GroupName": "艾恩葛朗特",
+            "ChannelID": "719892968579792907",
+            "ChannelName": "07",
+            "Power": ""
+        },
+        {
+            "type": "1",
+            "GroupID": "na",
+            "GroupName": "艾恩葛朗特",
+            "ChannelID": "719379242978377820",
+            "ChannelName": "機廳",
+            "Power": "4"
+        }
+    ],
+    "blackUsers": [{
+        "id": "0",
+        "userID": "1",
+        "userName": "2",
+        "userPower": "3",
+        "backUp": "4"
+    }]
 }

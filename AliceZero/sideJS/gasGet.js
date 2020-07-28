@@ -66,7 +66,7 @@ exports.getSkill = function(name, callback) {
 
 
     request(skills, function(error, response) {
-        if (error) throw new Error(error);
+        if (error) callback('出現意外錯誤~\n通常是google不開心了');
         if (response.body !== undefined && typeof(response.body) === 'string') {
             if (response.body.substring(0, 1) !== '{') {
                 callback('出現意外錯誤~\n通常是google不開心了');
@@ -132,7 +132,7 @@ exports.getBlackList = function(callback) {
     request(blackList, function(error, response) {
         //if (error) throw new Error(error);
         if (error) {
-            callback(error);
+            callback('出現意外錯誤~\n通常是google不開心了');
         } else {
             if (response.body !== undefined && typeof(response.body) === 'string') {
                 if (response.body.substring(0, 1) !== '{') {
@@ -197,17 +197,44 @@ const catImage = {
     'url': `https://api.imgur.com/3/album/${auth.imgur.catImage}/images`,
     'headers': { 'Authorization': 'Bearer ' + auth.imgur.token }
 };
+const foodImage = {
+    'method': 'GET',
+    'url': `https://api.imgur.com/3/album/${auth.imgur.foodImage}/images`,
+    'headers': { 'Authorization': 'Bearer ' + auth.imgur.token }
+};
 //#endregion
 
 //#region 實作
+//貓咪
 exports.getCatImage = function(callback) {
     request(catImage, function(error, response) {
-        if (error) throw new Error(error);
-        catImageData = JSON.parse(response.body);
-        if (catImageData.status == 200) {
-            const imageID = Math.floor(Math.random() * Math.floor(catImageData.data.length));
-            callback(catImageData.data[imageID].link);
-        } else {
+        try {
+            if (error) callback('出現錯誤!如果問題持續存在，請通知作者');
+            const catImageData = JSON.parse(response.body);
+            if (catImageData.status == 200) {
+                const imageID = Math.floor(Math.random() * Math.floor(catImageData.data.length));
+                callback(catImageData.data[imageID].link);
+            } else {
+                callback('出現錯誤!如果問題持續存在，請通知作者');
+            }
+        } catch {
+            callback('出現錯誤!如果問題持續存在，請通知作者');
+        }
+    });
+};
+//食物
+exports.getFoodImage = function(callback) {
+    request(foodImage, function(error, response) {
+        try {
+            if (error) callback('出現錯誤!如果問題持續存在，請通知作者');
+            const foodImageData = JSON.parse(response.body);
+            if (foodImageData.status == 200) {
+                const imageID = Math.floor(Math.random() * Math.floor(foodImageData.data.length));
+                callback(foodImageData.data[imageID].link);
+            } else {
+                callback('出現錯誤!如果問題持續存在，請通知作者');
+            }
+        } catch {
             callback('出現錯誤!如果問題持續存在，請通知作者');
         }
     });
