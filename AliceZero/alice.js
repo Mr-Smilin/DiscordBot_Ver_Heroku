@@ -33,11 +33,10 @@ let botMessage;
 let userMessage;
 
 //歌單
-let songList = new Array();
-let nowSongName;
-let dispatcher;
-let nowMusicPlayGuild = undefined;
-let songInfo = new Array(); //歌曲詳細資訊
+let nowSongName = new Map();
+let dispatcher = new Map();
+let songList = new Map();
+let songInfo = new Map(); //歌曲詳細資訊
 let songLoop = false; //歌曲循環
 //#endregion
 
@@ -74,7 +73,8 @@ client.on('ready', () => {
                 if (value) {
                     userMessage = value;
                 }
-                client.user.setPresence({ game: { name: '請使用 ~ help 查詢使用說明書!' }, status: 'idle' });
+                client.user.setActivity('請使用 ~ help 查詢使用說明書!', { type: 'WATCHING' });
+                client.user.setAFK(true);
                 console.log(`Logged in as ${client.user.tag}!`);
                 downloading = false; //下載結束
             })
@@ -178,9 +178,7 @@ function SelectFunctionFromBeforeText(msg, cmd, args = [""]) {
 async function DoBaseFunction(msg, cmd, args) {
     switch (cmd) {
         case 'help':
-            messageManager.HelpMessage(Discord.RichEmbed, function(embed) {
-                msg.channel.send(embed);
-            })
+            GetHelpMessage(msg, args)
             break;
         case '老婆':
             msg.reply('你沒有老婆!!');
@@ -345,10 +343,7 @@ function DoRaidersGet(msg, cmd, args) {
 
 //音樂指令
 function DoMusicFunction(msg, cmd, args) {
-    if (nowMusicPlayGuild === msg.guild.id || nowMusicPlayGuild === undefined)
-        goToMusicHouse(msg, cmd, args);
-    else
-        msg.channel.send('目前有其他群組正在使用此功能，請稍等喔!')
+    goToMusicHouse(msg, cmd, args);
 }
 
 //關鍵字回復
@@ -703,7 +698,6 @@ function getFoodImage(msg) {
 //#region 播歌類方法
 //進語音房播歌
 async function goToMusicHouse(msg, cmd, args) {
-    nowMusicPlayGuild = msg.guild.id;
     switch (cmd) {
         case 'Alice':
             return musicMaster(msg);
@@ -723,14 +717,17 @@ async function goToMusicHouse(msg, cmd, args) {
     if (info.videoDetails) {
         if (msg.member.voiceChannel) {
             if (!msg.guild.voiceConnection) {
-                addMusicToSongList(cmd);
+                const nowMusicPlayGuild = msg.guild.id;
+                songList.set(nowMusicPlayGuild, new Array());
+                songInfo.set(nowMusicPlayGuild, new Array());
+                addMusicToSongList(msg, cmd);
                 addMusicInfoToSongInfo(info);
-                playMusic(msg);
+                playMusic(msg, nowMusicPlayGuild);
                 msg.channel.send('來了~').then(
                     msg.delete()
                 ).catch(err => console.log('musicError1'));
             } else {
-                addMusicToSongList(cmd);
+                addMusicToSongList(msg, cmd);
                 addMusicInfoToSongInfo(info);
                 msg.channel.send('已幫你加入歌單~!').then(
                     msg.delete()
@@ -755,14 +752,17 @@ async function addMusicToOne(msg, args) {
     if (info.videoDetails) {
         if (msg.member.voiceChannel) {
             if (!msg.guild.voiceConnection) {
-                addMusicToSongList(args[0]);
+                nowMusicPlayGuild = msg.guild.id;
+                songList.set(nowMusicPlayGuild, new Array());
+                songInfo.set(nowMusicPlayGuild, new Array());
+                addMusicToSongList(msg, args[0]);
                 addMusicInfoToSongInfo(info);
                 playMusic(msg);
                 msg.channel.send('來了~').then(
                     msg.delete()
                 ).catch(err => console.log('musicError3'));
             } else {
-                addMusicToSongList(args[0], 2);
+                addMusicToSongList(msg, args[0], 2);
                 addMusicInfoToSongInfo(info, 2);
                 msg.channel.send('好的，下一首播這個喔!').then(
                     msg.delete()
@@ -778,13 +778,17 @@ async function addMusicToOne(msg, args) {
 }
 
 //退出語音頻道
-function goBackHomeFromMusicHouse(msg) {
-    nowMusicPlayGuild = undefined;
-    if (msg.guild.voiceConnection) {
-        nowSongName = undefined;
-        songList = new Array();
-        songInfo = new Array();
-        msg.guild.voiceConnection.disconnect();
+function goBackHomeFromMusicHouse(msg, nowMusicPlayGuild) {
+    if (client.voiceConnections.get(nowMusicPlayGuild)) {
+        try {
+            nowSongName.set(nowMusicPlayGuild, undefined);
+            songList.set(nowMusicPlayGuild, new Array());
+            songInfo.set(nowMusicPlayGuild, new Array());
+            client.voiceConnections.get(nowMusicPlayGuild).disconnect();
+            nowMusicPlayGuild = undefined;
+        } catch {
+            console.log('MusicEndError');
+        }
         msg.channel.send('晚安~');
     } else {
         msg.channel.send('可是..我還沒進來:3');
@@ -792,11 +796,11 @@ function goBackHomeFromMusicHouse(msg) {
 }
 
 //添加歌曲進歌單
-function addMusicToSongList(src, type = 1) {
+function addMusicToSongList(msg, src, type = 1) {
     if (type === 1) {
-        songList.push(src);
+        songList.get(nowMusicPlayGuild).push(src);
     } else if (type === 2) {
-        songList.unshift(src)
+        songList.get(nowMusicPlayGuild).unshift(src)
     }
 }
 
@@ -804,36 +808,25 @@ function addMusicToSongList(src, type = 1) {
 function addMusicInfoToSongInfo(info, type = 1) {
     if (info.videoDetails) {
         if (type === 1) {
-            songInfo.push(info.videoDetails);
+            songInfo.get(nowMusicPlayGuild).push(info.videoDetails);
         } else if (type === 2) {
-            if (songInfo.length !== 0) {
-                nowSongInfo = songInfo.shift();
-                songInfo.unshift(info.videoDetails);
-                songInfo.unshift(nowSongInfo);
+            if (songInfo.get(nowMusicPlayGuild).length !== 0) {
+                nowSongInfo = songInfo.get(nowMusicPlayGuild).shift();
+                songInfo.get(nowMusicPlayGuild).unshift(info.videoDetails);
+                songInfo.get(nowMusicPlayGuild).unshift(nowSongInfo);
             } else {
-                songInfo.unshift(info.videoDetails);
+                songInfo.get(nowMusicPlayGuild).unshift(info.videoDetails);
             }
         }
     }
 }
 
 //播放歌曲
-async function playMusic(msg) {
-    nowSongName = songList.shift();
-    const streamOptions = { seek: 0, volume: 0.5 };
-    let stream = await ytdl(nowSongName, { filter: 'audioonly', quality: 'highestaudio' });
+function playMusic(msg, nowMusicPlayGuild) {
     msg.member.voiceChannel.join().then(
         connection => {
             try {
-                dispatcher = connection.playStream(stream, streamOptions);
-                dispatcher.on("end", end => {
-                    newMusicEnd();
-                    if (songList.length != 0) {
-                        playMusic(msg);
-                    } else {
-                        goBackHomeFromMusicHouse(msg);
-                    }
-                });
+                musicPlay2(connection, msg, nowMusicPlayGuild);
             } catch {
                 msg.channel.send('播歌期間發生錯誤!\n可能是這首歌小愛不喜歡聽')
             }
@@ -841,35 +834,48 @@ async function playMusic(msg) {
     ).catch(err => {
         console.log('musicError5');
         console.log('播歌期間發生錯誤');
-        nowSongName = undefined;
-        if (songList.length != 0) {
-            playMusic(msg);
-        } else {
-            goBackHomeFromMusicHouse(msg);
-        }
+        nowSongName.set(nowMusicPlayGuild, undefined);
+        goBackHomeFromMusicHouse(msg, nowMusicPlayGuild);
     });
 }
 
+//與playMusic分割，避免重複進出語音
+async function musicPlay2(connection, msg, nowMusicPlayGuild) {
+    nowSongName.set(nowMusicPlayGuild, songList.get(nowMusicPlayGuild).shift());
+    const streamOptions = { seek: 0, volume: 0.5 };
+    let stream = await ytdl(nowSongName.get(nowMusicPlayGuild), { filter: 'audioonly', quality: 'highestaudio' });
+    //dispatcher = connection.playStream(stream, streamOptions);
+    dispatcher.set(nowMusicPlayGuild, connection.playStream(stream, streamOptions));
+    dispatcher.get(nowMusicPlayGuild).on("end", end => {
+        newMusicEnd(msg);
+        if (songList.get(nowMusicPlayGuild).length != 0) {
+            musicPlay2(connection, nowMusicPlayGuild);
+        } else {
+            goBackHomeFromMusicHouse(msg, nowMusicPlayGuild);
+        }
+    });
+};
+
 //歌曲結束事件
-function newMusicEnd() {
+function newMusicEnd(msg) {
     if (songLoop) {
-        songInfo.push(songInfo.shift());
-        songList.push(nowSongName);
-        nowSongName = undefined; //避免bug
+        songInfo.get(nowMusicPlayGuild).push(songInfo.get(nowMusicPlayGuild).shift());
+        songList.get(nowMusicPlayGuild).push(nowSongName.get(nowMusicPlayGuild));
+        nowSongName.set(nowMusicPlayGuild, undefined); //避免bug
     } else {
-        songInfo.shift(); //將最舊的歌曲資訊清出
-        nowSongName = undefined;
+        songInfo.get(nowMusicPlayGuild).shift(); //將最舊的歌曲資訊清出
+        nowSongName.set(nowMusicPlayGuild, undefined);
     }
 }
 
 //歌曲列表
 function musicList(msg) {
-    if (nowSongName === undefined) {
+    if (nowSongName.get(nowMusicPlayGuild) === undefined) {
         msg = '當前沒有歌曲隊列喔!';
     } else {
         msgs = '```歌曲列表~\n'
-        for (i = 0; i < songInfo.length; i++) {
-            msgs = msgs + (i + 1) + '. ' + songInfo[i].title + '\n'
+        for (i = 0; i < songInfo.get(nowMusicPlayGuild).length; i++) {
+            msgs = msgs + (i + 1) + '. ' + songInfo.get(nowMusicPlayGuild)[i].title + '\n'
         }
         msgs = msgs + '```';
     }
@@ -878,10 +884,10 @@ function musicList(msg) {
 
 //播歌功能控制台
 function musicMaster(msg) {
-    if (nowSongName === undefined) {
+    if (nowSongName.get(msg.guild.id) === undefined) {
         msg.channel.send('?');
     } else {
-        songMasterMessage = msg.channel.send('當前播放歌曲~\n' + nowSongName + '\n下一首 | 清單 | 循環').then(
+        songMasterMessage = msg.channel.send('當前播放歌曲~\n' + nowSongName.get(msg.guild.id) + '\n下一首 | 清單 | 循環').then(
             msg.react('⏩')
         ).then(
             msg.react('📃')
@@ -898,11 +904,11 @@ function musicMaster(msg) {
         const collector = msg.createReactionCollector(filter, { time: 600000 });
 
         collector.on('collect', (reaction, user) => {
-            if (dispatcher !== undefined) {
+            if (dispatcher.get(msg.guild.id) !== undefined) {
                 switch (reaction.emoji.name) {
                     case '⏩':
-                        if (songList.length != 0) {
-                            dispatcher.end();
+                        if (songList.get(msg.guild.id).length != 0) {
+                            dispatcher.get(msg.guild.get).end();
                         } else {
                             msg.reply('沒有下一首了呦')
                         }
@@ -914,10 +920,10 @@ function musicMaster(msg) {
                         musicList(msg);
                         break;
                     case '⏸️':
-                        dispatcher.pause();
+                        dispatcher.get(msg.guild.get).pause();
                         break;
                     case '▶️':
-                        dispatcher.resume();
+                        dispatcher.get(msg.guild.get).resume();
                         break;
                     case '🔁':
                         if (songLoop) msg.channel.send('循環功能關閉!')
@@ -937,6 +943,28 @@ function musicMaster(msg) {
 //#endregion
 
 //#region 小/基本功能
+//help方法
+function GetHelpMessage(msg, args) {
+    switch (args[0]) {
+        case '!':
+            messageManager.HelpMessage2(Discord.RichEmbed, function(embed) {
+                msg.channel.send(embed);
+            })
+            break;
+        case '攻略組':
+            messageManager.HelpMessage3(Discord.RichEmbed, function(embed) {
+                msg.channel.send(embed);
+            })
+            break;
+        default:
+            messageManager.HelpMessage(Discord.RichEmbed, function(embed) {
+                msg.channel.send(embed);
+            })
+            break;
+    }
+
+}
+
 //權限判斷 預設判斷群組id
 function findPowerFromBaseValue(msg, temp) {
     let a = baseValue.Power.find(item => item.ChannelID == msg.channel.id && item.Power.indexOf(temp) != -1);
