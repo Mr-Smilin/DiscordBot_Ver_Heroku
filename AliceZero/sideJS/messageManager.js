@@ -9,42 +9,43 @@ const Description = '人工高適應性知性自律存在';
 const Thumbnail = 'https://i.imgur.com/5ffD6du.png';
 const Field = '小愛#0143';
 const Field2 = '主人您好，請問有何吩咐?';
-const footerText = 'Season生日快樂٩(｡・ω・｡)﻿و';
+//07群的都是變態484
+//Season生日快樂٩(｡・ω・｡)﻿و
+const footerText = '聽說UW桐那邊是話語霸權';
 const footerPicture = 'https://i.imgur.com/crrk7I2.png';
 
 //help romID:0
 exports.HelpMessage = function(RichEmbed, callback) {
-        const embed = new RichEmbed()
-            .setColor(color)
-            .setTitle(title)
-            //.setURL('https://i.imgur.com/UV6lgWg.jpg')
-            .setAuthor(Author, Author2, Author3)
-            .setDescription(Description)
-            .setThumbnail(Thumbnail)
-            .addField(Field, Field2)
-            .addBlankField()
-            .addField('系統命令', '神聖術語 ~')
-            .addField('help', '幫助指令', true)
-            .addField('s {貼圖編號}', '根據編號反饋貼圖(如果小愛有的話)', true)
-            .addBlankField(true)
-            .addField('貓', '貓咪', true)
-            .addField('食物', '請務必在晚上使用', true)
-            .addBlankField(true)
-            .addBlankField()
-            .addField('如果要查詢其他指令的話...', '記得神聖術語都有空格喔!')
-            .addField('請小愛播放歌曲', '~ help !')
-            .addField('查詢攻略組們努力製作的表單', '~ help 攻略組')
-            .addBlankField()
-            .addField('以上是目前小愛開放的指令', '除此以外..')
-            .addField('回答', '有時會在大家聊天時回應大家的話', true)
-            .addField('紀錄', '小愛會記下誰偷偷刪除訊息', true)
-            .addField('情報', '無限期支持myShino計畫~', true)
-            //.setImage('https://i.imgur.com/wSTFkRM.png')
-            .setTimestamp()
-            .setFooter(footerText, footerPicture);
-        callback(embed);
-    }
-    //07群的都是變態484
+    const embed = new RichEmbed()
+        .setColor(color)
+        .setTitle(title)
+        //.setURL('https://i.imgur.com/UV6lgWg.jpg')
+        .setAuthor(Author, Author2, Author3)
+        .setDescription(Description)
+        .setThumbnail(Thumbnail)
+        .addField(Field, Field2)
+        .addBlankField()
+        .addField('系統命令', '神聖術語 ~')
+        .addField('help', '幫助指令', true)
+        .addField('s {貼圖編號}', '根據編號反饋貼圖(如果小愛有的話)', true)
+        .addField('dice [範圍]', '小愛扔骰子', true)
+        .addField('貓', '貓咪', true)
+        .addField('食物', '請務必在晚上使用', true)
+        .addBlankField(true)
+        .addBlankField()
+        .addField('如果要查詢其他指令的話...', '記得神聖術語都有空格喔!')
+        .addField('請小愛播放歌曲', '~ help !')
+        .addField('查詢攻略組們努力製作的表單', '~ help 攻略組')
+        .addBlankField()
+        .addField('以上是目前小愛開放的指令', '除此以外..')
+        .addField('回答', '有時會在大家聊天時回應大家的話', true)
+        .addField('紀錄', '小愛會記下誰偷偷刪除訊息', true)
+        .addField('情報', '無限期支持myShino計畫~', true)
+        //.setImage('https://i.imgur.com/wSTFkRM.png')
+        .setTimestamp()
+        .setFooter(footerText, footerPicture);
+    callback(embed);
+}
 
 //播歌
 exports.HelpMessage2 = function(RichEmbed, callback) {
