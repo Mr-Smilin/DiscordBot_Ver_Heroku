@@ -900,8 +900,18 @@ function playMusic(msg, nowMusicPlayGuild, nowMusicPlayChanel) {
 async function musicPlay2(connection, nowMusicPlayGuild, nowMusicPlayChanel) {
     try {
         nowSongName.set(nowMusicPlayGuild, songList.get(nowMusicPlayGuild).shift());
-        const streamOptions = { seek: 0, volume: 0.5 };
-        let stream = await ytdl(nowSongName.get(nowMusicPlayGuild), { filter: 'audioonly', quality: 'highestaudio' });
+        const streamOptions = {
+            seek: 0,
+            volume: 0.5,
+            Bitrate: 192000,
+            Passes: 1
+        };
+        streamOptions.highWaterMark = 1;
+        let stream = await ytdl(nowSongName.get(nowMusicPlayGuild), {
+            filter: 'audioonly',
+            quality: 'highestaudio',
+            highWaterMark: 26214400 //25ms
+        });
         //dispatcher = connection.playStream(stream, streamOptions);
         dispatcher.set(nowMusicPlayGuild, connection.playStream(stream, streamOptions));
         dispatcher.get(nowMusicPlayGuild).on("end", end => {

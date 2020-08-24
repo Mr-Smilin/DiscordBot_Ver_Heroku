@@ -62,7 +62,7 @@ exports.getLevel = function(newLevel, range = 1, callback) {
 
 //獲取技能列表
 exports.getSkill = function(name, callback) {
-    errMsg = '```技能查詢\n語法:攻略組 技能 {角色名稱}\n\n根據角色名稱，反饋此角色已記錄技能與獲得條件\n\n角色名稱需與表單完全一致';
+    errMsg = '```技能查詢\n語法:攻略組 技能 {角色名稱}\n\n根據角色名稱，反饋此角色已記錄技能與簡介\n\n角色名稱需與表單完全一致';
 
 
     request(skills, function(error, response) {
@@ -86,6 +86,8 @@ exports.getSkill = function(name, callback) {
             skills.push(data[name].skill6);
             skills.push(data[name].skill7);
             skills.push(data[name].skill8);
+            skills.push(data[name].skill9);
+            skills.push(data[name].skill10);
 
             let tasks = new Array;
             tasks.push(data[name].task1);
@@ -96,8 +98,10 @@ exports.getSkill = function(name, callback) {
             tasks.push(data[name].task6);
             tasks.push(data[name].task7);
             tasks.push(data[name].task8);
+            tasks.push(data[name].task9);
+            tasks.push(data[name].task10);
 
-            for (var i = 8; i >= 1; i--) {
+            for (var i = 10; i >= 1; i--) {
                 if (skills[i] !== '') {
                     skills[0] = i;
                     break;
@@ -107,7 +111,7 @@ exports.getSkill = function(name, callback) {
             msg = '```';
             msg = msg + `角色  ${name}`;
             for (var i = 0; i < skills[0]; i++) {
-                msg = msg + '\n技能' + (i + 1) + ' ' + paddingRightForCn(skills[i + 1], 8) + '| 獲取條件 ' + paddingRightForCn(tasks[i], 8);
+                msg = msg + '\n技能' + (i + 1) + ' ' + paddingRightForCn(skills[i + 1], 8) + '| 技能簡介 ' + paddingRightForCn(tasks[i], 8);
             }
             msg = msg + '```';
             callback(msg);
