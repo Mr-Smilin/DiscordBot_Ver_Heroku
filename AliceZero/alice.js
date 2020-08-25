@@ -1110,13 +1110,36 @@ function getDice(msg, cmd, args) {
     rangeText.push('在一陣強光中骰出了');
     rangeText.push('運氣很好的骰出了');
 
-    const regex = /^[0-9\s]*$/;
-    let range = 6;
-    if (regex.test(args[0]) && args[0] != '') {
-        range = args[0];
+    const regex = /^[0-9]*$/; //純數字
+    const regex2 = /^[0-9]*[Dd][0-9]*$/; //純數字 D 純數字 EX:2D12
+    const regex3 = /@/;
+    if (regex2.test(args[0]) && args[0] != '') {
+        let msgEd = ``;
+        if (args[1] != undefined && !regex3.test(args[1])) {
+            msgEd = `${args[1]} `;
+        }
+        msgEd = `${msgEd}\n進行亂數檢定${args[0]}`;
+        const valueEd = args[0].split('D');
+        if (valueEd[0] > 10) valueEd = 10;
+        let a = 0; //存儲亂數用
+        let b = 0; //存儲亂數總和用
+        for (i = 0; i < valueEd[0]; i++) {
+            a = Math.floor((Math.random() * valueEd[1]) + 1);
+            b = b + a;
+            msgEd = `${msgEd}\n第 ${i+1} 次 
+            ${rangeText[Math.floor(Math.random() * rangeText.length)]} 
+            ${a} 點!!`;
+        }
+        msgEd = `${msgEd}\n\n 檢定結束，${msg.author.username} 骰出了 ${b} !!`;
+        msg.channel.send(msgEd);
+    } else {
+        let range = 6;
+        if (regex.test(args[0]) && args[0] != '') {
+            range = args[0];
+        }
+        const a = Math.floor((Math.random() * range) + 1);
+        msg.channel.send(`${msg.author.username} ${rangeText[Math.floor(Math.random() * rangeText.length)]} ${a} 點!!`);
     }
-    const a = Math.floor((Math.random() * range) + 1);
-    msg.channel.send(`${msg.author.username} ${rangeText[Math.floor(Math.random() * rangeText.length)]} ${a} 點!!`);
 }
 //#endregion
 
