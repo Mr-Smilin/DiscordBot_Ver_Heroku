@@ -109,9 +109,9 @@ exports.getSkill = function(name, callback) {
             }
 
             msg = '```';
-            msg = msg + `角色  ${name}`;
+            msg = msg + `角色  ${name}\n獲得方式 ${data[name].getData}`;
             for (var i = 0; i < skills[0]; i++) {
-                msg = msg + '\n技能' + (i + 1) + ' ' + paddingRightForCn(skills[i + 1], 8) + '| 技能簡介 ' + paddingRightForCn(tasks[i], 8);
+                msg = msg + '\n技能' + (i + 1) + ' ' + paddingRightForCn(skills[i + 1], 15) + '| 技能簡介 ' + tasks[i];
             }
             msg = msg + '```';
             callback(msg);

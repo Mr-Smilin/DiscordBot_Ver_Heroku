@@ -5,7 +5,7 @@
             "GroupName": "石頭's Server",
             "ChannelID": "na",
             "ChannelName": "測試區",
-            "Power": "012349"
+            "Power": "0123456789"
         },
         {
             "type": "1",
@@ -21,7 +21,7 @@
             "GroupName": "艾恩葛朗特",
             "ChannelID": "na",
             "ChannelName": "na",
-            "Power": "012349"
+            "Power": "0123456789"
         },
         {
             "type": "1",
@@ -38,6 +38,30 @@
             "ChannelID": "719379242978377820",
             "ChannelName": "機廳",
             "Power": "4"
+        },
+        {
+            "type": "1",
+            "GroupID": "na",
+            "GroupName": "艾恩葛朗特",
+            "ChannelID": "728176161909112873",
+            "ChannelName": "益智遊戲觀戰區",
+            "Power": "012346789"
+        },
+        {
+            "type": "1",
+            "GroupID": "na",
+            "GroupName": "艾恩葛朗特",
+            "ChannelID": "735769134020952147",
+            "ChannelName": "益智遊戲測試區",
+            "Power": "012346789"
+        },
+        {
+            "type": "1",
+            "GroupID": "na",
+            "GroupName": "艾恩葛朗特",
+            "ChannelID": "727781450342203424",
+            "ChannelName": "益智遊戲遊戲主頻道",
+            "Power": "012346789"
         }
     ],
     "blackUsers": [{

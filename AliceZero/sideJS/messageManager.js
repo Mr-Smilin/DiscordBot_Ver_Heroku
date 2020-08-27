@@ -11,7 +11,7 @@ const Field = '小愛#0143';
 const Field2 = '主人您好，請問有何吩咐?';
 //07群的都是變態484
 //Season生日快樂٩(｡・ω・｡)﻿و
-const footerText = '聽說UW桐那邊是話語霸權';
+const footerText = 'DeasonDio生日快樂٩(｡・ω・｡)﻿و';
 const footerPicture = 'https://i.imgur.com/crrk7I2.png';
 
 //help romID:0
@@ -28,7 +28,7 @@ exports.HelpMessage = function(RichEmbed, callback) {
         .addField('系統命令', '神聖術語 ~')
         .addField('help', '幫助指令', true)
         .addField('s {貼圖編號}', '根據編號反饋貼圖(如果小愛有的話)', true)
-        .addField('dice [範圍]', '小愛扔骰子', true)
+        .addField('dice [範圍] [標題]', '小愛扔骰子', true)
         .addField('貓', '貓咪', true)
         .addField('食物', '請務必在晚上使用', true)
         .addBlankField(true)
@@ -36,6 +36,7 @@ exports.HelpMessage = function(RichEmbed, callback) {
         .addField('如果要查詢其他指令的話...', '記得神聖術語都有空格喔!')
         .addField('請小愛播放歌曲', '~ help !')
         .addField('查詢攻略組們努力製作的表單', '~ help 攻略組')
+        .addField('找小愛一起玩遊戲', '~ help T')
         .addBlankField()
         .addField('以上是目前小愛開放的指令', '除此以外..')
         .addField('回答', '有時會在大家聊天時回應大家的話', true)
@@ -84,6 +85,25 @@ exports.HelpMessage3 = function(RichEmbed, callback) {
         .addField('黑特 [名稱]', '查詢黑鐵宮名單', true)
         .addField('成就', '可以查成就表了!', true)
         .addBlankField(true)
+        .setTimestamp()
+        .setFooter(footerText, footerPicture);
+    callback(embed);
+}
+
+//TRpg
+exports.HelpMessage4 = function(RichEmbed, callback) {
+    const embed = new RichEmbed()
+        .setColor(color)
+        .setTitle('system call generate TRpg function...')
+        .setAuthor(Author, Author2, Author3)
+        .setDescription('遊戲輔助指令')
+        .setThumbnail(Thumbnail)
+        .addBlankField()
+        .addField('找小愛一起玩遊戲', '神聖術語 T')
+        .addField('dice [次數A] [次數B]', '請小愛擲骰子', true)
+        .addField('[次數A]', '預設1次，可接受如 2D12 & 3B12>6 等格式', true)
+        .addField('[次數B]', '預設1次，指定整個行為的次數', true)
+        .addField('排序 [內容]*n', '請小愛幫忙打亂排序', true)
         .setTimestamp()
         .setFooter(footerText, footerPicture);
     callback(embed);

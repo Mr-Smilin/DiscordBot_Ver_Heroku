@@ -152,7 +152,7 @@ function SelectFunctionFromBeforeText(msg, cmd, args = [""]) {
     temp = findPowerFromBaseValue(msg, temp);
     //正則判斷
     if (cmd[1] !== undefined)
-        temp = DeleteTempIfHaveEx(cmd[1], temp);
+        temp = DeleteTempIfHaveEx(msg.content, temp);
     else temp = DeleteTempIfHaveEx(cmd[0], temp);
     //#endregion
 
@@ -166,8 +166,11 @@ function SelectFunctionFromBeforeText(msg, cmd, args = [""]) {
         case 3: //攻略組查表
             DoRaidersGet(msg, cmd[1], args);
             break;
-        case 4:
+        case 4: //音樂指令
             DoMusicFunction(msg, cmd[1], args);
+            break;
+        case 5: //TRpg指令
+            DoTRpgFunction(msg, cmd[1], args);
             break;
         case 9: //關鍵字回復
             DoBotMessageSend(msg, cmd[0], cmd[1]);
@@ -226,6 +229,12 @@ async function DoBaseFunction(msg, cmd, args) {
             break;
         case 'dice':
             getDice(msg, cmd, args);
+            break;
+        case 'd':
+            getDice(msg, cmd, args);
+            break;
+        case 'v':
+            //getVote(msg, cmd, args);
             break;
     }
 }
@@ -352,6 +361,27 @@ function DoMusicFunction(msg, cmd, args) {
     goToMusicHouse(msg, cmd, args);
 }
 
+//TRpg指令
+function DoTRpgFunction(msg, cmd, args) {
+    switch (cmd) {
+        case 'dice': //骰子
+            getTRpgDice(msg, args);
+            break;
+        case 'DICE': //骰子
+            getTRpgDice(msg, args);
+            break;
+        case 'd': //骰子
+            getTRpgDice(msg, args);
+            break;
+        case 'D': //骰子
+            getTRpgDice(msg, args);
+            break;
+        case '排序': //排序
+            getRandomSortArray(msg, cmd, args);
+            break;
+    }
+}
+
 //關鍵字回復
 function DoBotMessageSend(msg, cmd, args) {
     let BTalk;
@@ -413,19 +443,21 @@ client.on('messageDelete', message => {
 client.on('channelUpdate', function(oldChannel, newChannel) {
     try {
         //只做SAO群的簡介紀錄
-        if (newChannel.guild.id == '707946293603074108') {
-            let embed = new Discord.RichEmbed()
-                .setColor('#fbfbc9')
-                .setTimestamp();
-            //如果更新頻道訊息是07
-            if (oldChannel.id == '719892968579792907') {
-                embed.setTitle(newChannel.name);
-                embed.addField('簡介', newChannel.topic);
-                client.channels.get('746179713407385672').send(embed);
-            } else {
-                embed.setTitle(newChannel.name);
-                embed.addField('簡介', newChannel.topic);
-                client.channels.get('746179727747973138').send(embed);
+        if (newChannel.guild) {
+            if (newChannel.guild.id == '707946293603074108') {
+                let embed = new Discord.RichEmbed()
+                    .setColor('#fbfbc9')
+                    .setTimestamp();
+                //如果更新頻道訊息是07
+                if (oldChannel.id == '719892968579792907') {
+                    embed.setTitle(newChannel.name);
+                    embed.addField('簡介', newChannel.topic);
+                    client.channels.get('746179713407385672').send(embed);
+                } else {
+                    embed.setTitle(newChannel.name);
+                    embed.addField('簡介', newChannel.topic);
+                    client.channels.get('746179727747973138').send(embed);
+                }
             }
         }
     } catch (err) {
@@ -1052,6 +1084,11 @@ function GetHelpMessage(msg, args) {
                 msg.channel.send(embed);
             })
             break;
+        case 'T':
+            messageManager.HelpMessage4(Discord.RichEmbed, function(embed) {
+                msg.channel.send(embed);
+            })
+            break;
         default:
             messageManager.HelpMessage(Discord.RichEmbed, function(embed) {
                 msg.channel.send(embed);
@@ -1075,8 +1112,9 @@ function findPowerFromBaseValue(msg, temp) {
 //正則判斷 有奇怪符號的都給我出去
 function DeleteTempIfHaveEx(msg, temp) {
     let tempValue = temp;
-    if (msg.substring(0, 4) !== 'http') {
-        const t = /\!|\@|\:/;
+    //if (msg.substring(0, 4) !== 'http') {
+    if (tempValue != '4') {
+        const t = /\@|\:/;
         if (t.test(msg)) tempValue = -1;
     }
     return tempValue;
@@ -1103,42 +1141,300 @@ function paddingLeft(str, lenght) {
 
 //骰子
 function getDice(msg, cmd, args) {
-    let rangeText = new Array();
+    try {
+        let range = 6;
+        let rangeText = new Array();
 
-    rangeText.push('殘念的骰出了');
-    rangeText.push('在眾人溫和的目光下骰出了');
-    rangeText.push('在一陣強光中骰出了');
-    rangeText.push('運氣很好的骰出了');
+        rangeText.push('殘念的骰出了');
+        rangeText.push('在眾人溫和的目光下骰出了');
+        rangeText.push('在一陣強光中骰出了');
+        rangeText.push('運氣很好的骰出了');
+        rangeText.push('在灰庭醬的祝福下骰出了');
+        rangeText.push('「哈↑哈↑哈↓哈↑哈→」在大笑中的 兔田ぺこら 骰出了');
 
-    const regex = /^[0-9]*$/; //純數字
-    const regex2 = /^[0-9]*[Dd][0-9]*$/; //純數字 D 純數字 EX:2D12
-    const regex3 = /@/;
-    if (regex2.test(args[0]) && args[0] != '') {
+        const regex = /^[0-9]*$/; //純數字
+        const regex2 = /^[0-9]*[Dd][0-9]*$/; //純數字 D 純數字 EX:2D12
+        const regex2b = /^[0-9]*d[0-9]*$/; //純數字 d 純數字 EX:2D12
+        const regex3 = /[@ /\n]/;
+        const regex4 = /^[0-9]*[Dd][0-9]*>[0-9]*$/; //2D12>60
+        const regex5 = /^[0-9]*[Bb][0-9]*>[0-9]*$/; //2B12>6
+        if (regex5.test(args[0]) && args[0] != '') {
+            getBaceDice(msg, args, '2', rangeText)
+        } else
+        if (regex4.test(args[0]) && args[0] != '') {
+            getBaceDice(msg, args, '1', rangeText)
+        } else
+        if (regex2.test(args[0]) && args[0] != '') {
+            getBaceDice(msg, args, '0', rangeText)
+        } else {
+            if (regex.test(args[0]) && args[0] != '') {
+                range = args[0];
+            }
+            const a = Math.floor((Math.random() * range) + 1);
+            msg.channel.send(`${msg.author.username} ${rangeText[Math.floor(Math.random() * rangeText.length)]} ${a} 點!!`);
+        }
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+//基礎骰
+function getBaceDice(msg, args, typeED, rangeText) {
+    try {
+        const regex = /^[0-9]*$/; //純數字
+        const regex2b = /^[0-9]*d[0-9]*$/; //純數字 d 純數字 EX:2D12
+        const regex2c = /^[0-9]*d[0-9]*>[0-9]*$/; //純數字 D 純數字 EX:2D12
+        const regex3 = /[@ /\n]/;
+        const regex5b = /^[0-9]*b[0-9]*>[0-9]*$/;
         let msgEd = ``;
-        if (args[1] != undefined && !regex3.test(args[1])) {
+        let valueEd;
+        let a = 0; //存儲亂數用
+        let b = 0; //存儲亂數總和用
+        let strSelect = 0;
+        let bigSelect = 0; //<60
+        let bigCount = 0; //2b12>6 使用
+        const textDone = '~~';
+        if (args[1] != undefined && !regex3.test(args[1]) && args[1].length < 200) {
             msgEd = `${args[1]} `;
         }
         msgEd = `${msgEd}\n進行亂數檢定${args[0]}`;
-        const valueEd = args[0].split('D');
-        if (valueEd[0] > 10) valueEd = 10;
-        let a = 0; //存儲亂數用
-        let b = 0; //存儲亂數總和用
+
+        if (typeED === '2') {
+            if (regex5b.test(args[0])) valueEd = args[0].split('b');
+            else valueEd = args[0].split('B');
+            //截2d 12>60
+            bigSelect = valueEd[1].split('>');
+            valueEd[1] = bigSelect[0];
+            bigSelect = bigSelect[1];
+            if (bigSelect === '') bigSelect = 0;
+        } else if (typeED === '1') {
+            if (regex2c.test(args[0])) valueEd = args[0].split('d');
+            else valueEd = args[0].split('D');
+            //截2d 12>60
+            bigSelect = valueEd[1].split('>');
+            valueEd[1] = bigSelect[0];
+            bigSelect = bigSelect[1];
+            if (bigSelect === '') bigSelect = 0;
+        } else if (typeED === '0') {
+            if (regex2b.test(args[0])) valueEd = args[0].split('d');
+            else valueEd = args[0].split('D');
+        }
+
+        if (valueEd[0] > 10) valueEd[0] = 10;
+        if (valueEd[0] > 5) strSelect = 1; //太洗版了，5秒後自刪
+
+        if (regex.test(valueEd[1]) && valueEd[1] != '') {
+            range = valueEd[1];
+        }
+
         for (i = 0; i < valueEd[0]; i++) {
-            a = Math.floor((Math.random() * valueEd[1]) + 1);
+            a = Math.floor((Math.random() * range) + 1);
             b = b + a;
-            msgEd = `${msgEd}\n第 ${i+1} 次 
-            ${rangeText[Math.floor(Math.random() * rangeText.length)]} 
+            if (typeED === '2' && !(a > bigSelect)) {
+                msgEd = `${msgEd}\n${textDone}第 ${i+1} 次 ${rangeText[Math.floor(Math.random() * rangeText.length)]}${textDone} 
+                ${textDone}${a} 點!!${textDone}`;
+            } else {
+                bigCount = bigCount + 1; //type2才會用到
+                msgEd = `${msgEd}\n第 ${i+1} 次 ${rangeText[Math.floor(Math.random() * rangeText.length)]} 
             ${a} 點!!`;
+            }
         }
-        msgEd = `${msgEd}\n\n 檢定結束，${msg.author.username} 骰出了 ${b} !!`;
-        msg.channel.send(msgEd);
-    } else {
-        let range = 6;
-        if (regex.test(args[0]) && args[0] != '') {
-            range = args[0];
+        msgEd = `${msgEd}\n\n檢定結束，${msg.author.username} 骰出了 ${b} !!`;
+        if (typeED === '1') {
+            msgEd = `${msgEd}\n${b} > ${bigSelect} = ${b>bigSelect}`;
+        } else if (typeED === '2') {
+            msgEd = `${msgEd}\n→成功數 ${bigCount}`;
         }
-        const a = Math.floor((Math.random() * range) + 1);
-        msg.channel.send(`${msg.author.username} ${rangeText[Math.floor(Math.random() * rangeText.length)]} ${a} 點!!`);
+        msg.channel.send(msgEd).then(msg => {
+            if (strSelect == 1) {
+                setTimeout(() => {
+                    msg.delete();
+                }, 5000)
+            }
+        }).catch(err => { console.log('getBaceDiceError#02', err) });
+    } catch (err) {
+        console.log('getBaceDiceError', err);
+    }
+}
+
+//TRpg骰
+function getTRpgDice(msg, args) {
+    try {
+        const regex = [
+            /^[0-9]*$/,
+            /^[0-9]*[Bb][0-9]*>[0-9]*$/,
+            /^[0-9]*[Bb][0-9]*$/,
+            /^[0-9]*[Dd][0-9]*>[0-9]*$/,
+            /^[0-9]*[Dd][0-9]*$/
+        ];
+
+        regex.some(element => {
+            if (element.test(args[0])) {
+                if (args[1] != undefined) {
+                    if (parseFloat(args[1]) > 5) args[1] = 5;
+                    const forEnd = args[1];
+                    for (j = 0; j < forEnd; j++) getTRpgDice2(msg, args, regex.indexOf(element));
+                } else {
+                    getTRpgDice2(msg, args, regex.indexOf(element));
+                }
+                return true;
+            }
+        })
+    } catch (err) {
+        console.log('getTRpgDiceError');
+    }
+}
+
+function getTRpgDice2(msg, args, typeED) {
+    try {
+        let mStr = '';
+        let args0A = 'null';
+        let args0B = 'null';
+        let range = '6';
+        let tempValue = new Array;
+        let sumValue = 0;
+        let sussesCount = 0;
+        switch (typeED) {
+            case 0:
+                args0A = [0, 6];
+                if (args[0] == '') args0A[0] = '1';
+                else args0A[0] = args[0];
+                break;
+            case 1:
+                mStr = `\n(${args[0]})→`;
+                if (/^[0-9]*b[0-9]*>[0-9]*$/.test(args[0])) {
+                    args0A = args[0].split('b'); //2 , 6>8
+                    args0B = args0A[1].split('>'); // 6 , 8
+                    args0A[1] = args0B[0];
+                } else {
+                    args0A = args[0].split('B'); //2 , 6>8
+                    args0B = args0A[1].split('>'); // 6 , 8
+                    args0A[1] = args0B[0];
+                }
+                break;
+            case 2:
+                mStr = `\n(${args[0]})→`;
+                if (/^[0-9]*b[0-9]*$/.test(args[0])) {
+                    args0A = args[0].split('b'); //2 , 6
+                } else {
+                    args0A = args[0].split('B'); //2 , 6
+                }
+                break;
+            case 3:
+                mStr = `\n${args[0]}：\n`;
+                if (/^[0-9]*d[0-9]*>[0-9]*$/.test(args[0])) {
+                    args0A = args[0].split('d'); //2 , 6>8
+                    args0B = args0A[1].split('>'); // 6 , 8
+                    args0A[1] = args0B[0];
+                } else {
+                    args0A = args[0].split('D'); //2 , 6>8
+                    args0B = args0A[1].split('>'); // 6 , 8
+                    args0A[1] = args0B[0];
+                }
+                break;
+            case 4:
+                mStr = `\n${args[0]}：\n`;
+                if (/^[0-9]*d[0-9]*$/.test(args[0])) {
+                    args0A = args[0].split('d'); //2 , 6
+                } else {
+                    args0A = args[0].split('D'); //2 , 6
+                }
+                break;
+        }
+
+        if (parseFloat(args0A[0]) > 10) args0A[0] = 10;
+
+        if (args0A !== 'null')
+            if (args0A[1] !== '')
+                range = parseFloat(args0A[1]);
+
+        for (i = 0; i < parseFloat(args0A[0]); i++) {
+            tempValue.push(Math.floor((Math.random() * range) + 1));
+            sumValue = sumValue + tempValue[i];
+            if (typeED === 1) {
+                if (!(parseFloat(tempValue[i]) > parseFloat(args0B[1]))) {
+                    tempValue[i] = '~~' + tempValue[i] + '~~';
+                } else {
+                    sussesCount = sussesCount + 1;
+                }
+            }
+        }
+
+        switch (typeED) {
+            case 0:
+                mStr = `${mStr}[${tempValue}]`;
+                break;
+            case 1:
+                mStr = `${mStr}${tempValue}\n→成功數${sussesCount}`;
+                break;
+            case 2:
+                mStr = `${mStr}${tempValue}`;
+                break;
+            case 3:
+                mStr = `${mStr}${sumValue}[${tempValue}]`;
+                mStr = `${mStr} > ${args0B[1]} = ${parseFloat(sumValue)>parseFloat(args0B[1])}`;
+                break;
+            case 4:
+                mStr = `${mStr}${sumValue}[${tempValue}]`;
+                break;
+        }
+        msg.reply(mStr);
+    } catch (err) {
+        console.log(err, 'getTRpgDice2Error');
+    }
+}
+
+//排序
+function getRandomSortArray(msg, cmd, args) {
+    try {
+        const randomArray = args.sort(function() {
+            return .5 - Math.random();
+        });
+        const mStr = `排序\n→ ${randomArray}`;
+        let strLengthED = mStr.length;
+        if (mStr.length > 50) strLengthED = 50;
+        msg.channel.send((mStr).substring(0, strLengthED))
+            .catch('getRandomSortArrayError2');
+    } catch (err) {
+        console.log('getRandomSortArrayError', err);
+    }
+}
+
+//投票
+function getVote(msgA, cmd, args) {
+    try {
+        let mStr = '```投票 ' + args[0] + '\n```';
+        let selectArray = new Array();
+        let reachArray = ['🇦', '🇧', '🇨', '🇩', '🇪', '🇫', '🇬', '🇭', '🇮', '🇯'];
+
+        for (i = 1; i < args.length; i++) {
+            selectArray.push(args[i]);
+        }
+        const selectArrayCount = selectArray.length;
+        for (i = 10; i > selectArrayCount; i--) {
+            selectArray.push('null');
+        }
+
+        msgA.channel.send(mStr).then(msg => {
+            for (i = 0; i < selectArray.length; i++) {
+                if (selectArray[i] != 'null') msg.react(reachArray[i])
+            }
+
+            const filter = (reaction, user) => {
+                return reachArray.includes(reaction.emoji.name) && user.id === msgA.author.id;
+            };
+
+            let timeEd = 600000;
+            const collector = msg.createReactionCollector(filter, { time: timeEd });
+
+            collector.on('collect', (reaction, user) => {
+                //還沒做
+            })
+        }).catch(err => {
+            console.log('getVote', err)
+        })
+    } catch (err) {
+        console.log('topGetVoteError');
     }
 }
 //#endregion
