@@ -418,26 +418,45 @@ function DoBotMessageSend(msg, cmd, args) {
 client.on('messageUpdate', function(oldMessage, newMessage) {
     if (!oldMessage.guild || !newMessage.guild) return;
 
-    if (oldMessage.content !== newMessage.content) {
-        //愛恩葛朗特
-        if (oldMessage.guild.id === '707946293603074108') {
-            str = `事件 更新\n使用者 ${oldMessage.member.user.username}\n群組 ${oldMessage.channel.name}\n舊對話 ${oldMessage.content}\n新對話 ${newMessage.content}\n`;
-            client.channels.get('733348701346725888').send(str);
+    try {
+        if (oldMessage.content !== newMessage.content) {
+            //愛恩葛朗特
+            if (oldMessage.guild.id === '707946293603074108') {
+                str = `事件 更新\n使用者 ${oldMessage.member.user.username}\n群組 ${oldMessage.channel.name}\n舊對話 ${oldMessage.content}\n新對話 ${newMessage.content}\n`;
+                client.channels.get('733348701346725888').send(str)
+                    .catch(console.log('messageUpdate 文字錯誤'));
+            }
         }
+    } catch (err) {
+        console.log('messageUpdate 主錯誤')
     }
 })
 
 //抓刪 刪除事件
-client.on('messageDelete', message => {
-        if (!message.guild) return;
+client.on('messageDelete', function(message) {
+    if (!message.guild) return;
 
+    try {
         //愛恩葛朗特
         if (message.guild.id === '707946293603074108') {
             str = `事件 刪除\n使用者 ${message.member.user.username}\n群組 ${message.channel.name}\n刪除內容 ${message.content}\n`;
-            client.channels.get('733348701346725888').send(str);
+            client.channels.get('733348701346725888').send(str)
+                .catch('messageDelete文字錯誤');
+            message.attachments.forEach((value, key) => {
+                client.channels.get('733348701346725888').send({
+                    files: [{
+                        attachment: value.proxyURL,
+                        name: key + '.jpg'
+                    }]
+                }).catch('messageDelete抓圖錯誤')
+            });
         }
-    })
-    //#endregion
+    } catch (err) {
+        console.log('messageDelete 主錯誤')
+    }
+})
+
+//#endregion
 
 //#region 更新頻道簡介
 client.on('channelUpdate', function(oldChannel, newChannel) {
