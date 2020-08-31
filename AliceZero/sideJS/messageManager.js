@@ -15,7 +15,7 @@ const footerText = 'DeasonDio生日快樂٩(｡・ω・｡)﻿و';
 const footerPicture = 'https://i.imgur.com/crrk7I2.png';
 
 //help romID:0
-exports.HelpMessage = function(RichEmbed, callback) {
+exports.HelpMessage = function (RichEmbed, callback) {
     const embed = new RichEmbed()
         .setColor(color)
         .setTitle(title)
@@ -49,7 +49,7 @@ exports.HelpMessage = function(RichEmbed, callback) {
 }
 
 //播歌
-exports.HelpMessage2 = function(RichEmbed, callback) {
+exports.HelpMessage2 = function (RichEmbed, callback) {
     const embed = new RichEmbed()
         .setColor(color)
         .setTitle('System call generate music function..')
@@ -70,7 +70,7 @@ exports.HelpMessage2 = function(RichEmbed, callback) {
 }
 
 //攻略組
-exports.HelpMessage3 = function(RichEmbed, callback) {
+exports.HelpMessage3 = function (RichEmbed, callback) {
     const embed = new RichEmbed()
         .setColor(color)
         .setTitle('system call generate MBC function...')
@@ -85,13 +85,14 @@ exports.HelpMessage3 = function(RichEmbed, callback) {
         .addField('黑特 [名稱]', '查詢黑鐵宮名單', true)
         .addField('成就', '可以查成就表了!', true)
         .addBlankField(true)
+        .addField('樓層', '查詢樓層Boss資訊', true)
         .setTimestamp()
         .setFooter(footerText, footerPicture);
     callback(embed);
 }
 
 //TRpg
-exports.HelpMessage4 = function(RichEmbed, callback) {
+exports.HelpMessage4 = function (RichEmbed, callback) {
     const embed = new RichEmbed()
         .setColor(color)
         .setTitle('system call generate TRpg function...')
@@ -110,7 +111,7 @@ exports.HelpMessage4 = function(RichEmbed, callback) {
 }
 
 //EditRomValue romID:2
-exports.EditRomValueMessage = function(RichEmbed, channel, romValue, ranValue, callback) {
+exports.EditRomValueMessage = function (RichEmbed, channel, romValue, ranValue, callback) {
     let embed = new RichEmbed()
         .setColor('#6A6AFF')
         .setTitle('觸發詞修改')
@@ -128,7 +129,7 @@ exports.EditRomValueMessage = function(RichEmbed, channel, romValue, ranValue, c
                 value = romValue[i].value;
 
             //判斷此頻道是否有更換過此內容
-            ranID = ranValue.filter(function(item) {
+            ranID = ranValue.filter(function (item) {
                 return item.ChannelID == channel && item.ID == id;
             })
 
