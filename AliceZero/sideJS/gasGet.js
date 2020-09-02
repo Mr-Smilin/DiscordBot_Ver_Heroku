@@ -43,14 +43,14 @@ const bosses = {
 
 //#region 實作&處理資料
 //獲取等級&轉生點
-exports.getLevel = function (newLevel, range = 1, callback) {
+exports.getLevel = function(newLevel, range = 1, callback) {
     let backValue = new Array;
-    request(levels, function (error, response) {
+    request(levels, function(error, response) {
         //if (error) throw new Error(error);
         if (error) {
             callback(error);
         } else {
-            if (response.body !== undefined && typeof (response.body) === 'string') {
+            if (response.body !== undefined && typeof(response.body) === 'string') {
                 if (response.body.substring(0, 1) !== '{') {
                     callback('出現意外錯誤~\n通常是google不開心了');
                 }
@@ -68,14 +68,14 @@ exports.getLevel = function (newLevel, range = 1, callback) {
 };
 
 //獲取技能列表
-exports.getSkill = function (name, RichEmbed, callback) {
+exports.getSkill = function(name, RichEmbed, callback) {
     try {
         errMsg = '```技能查詢\n語法:攻略組 技能 {角色名稱}\n\n根據角色名稱，反饋此角色已記錄技能與簡介\n\n角色名稱需與表單完全一致';
 
 
-        request(skills, function (error, response) {
+        request(skills, function(error, response) {
             if (error) callback('出現意外錯誤~\n通常是google不開心了');
-            if (response.body !== undefined && typeof (response.body) === 'string') {
+            if (response.body !== undefined && typeof(response.body) === 'string') {
                 if (response.body.substring(0, 1) !== '{') {
                     callback('出現意外錯誤~\n通常是google不開心了');
                 }
@@ -134,7 +134,7 @@ exports.getSkill = function (name, RichEmbed, callback) {
                 // if (data[name].backUp !== '') msg = msg + `\n備註 ${data[name].backUp}`;
                 for (var i = 0; i < skills[0]; i++) {
                     embed.addField(skills[i + 1], tasks[i], true)
-                    // msg = msg + '\n技能' + (i + 1) + ' ' + paddingRightForCn(skills[i + 1], 15) + '| 技能簡介 ' + tasks[i];
+                        // msg = msg + '\n技能' + (i + 1) + ' ' + paddingRightForCn(skills[i + 1], 15) + '| 技能簡介 ' + tasks[i];
                 }
                 //msg = msg + '```';
                 callback(embed);
@@ -152,20 +152,19 @@ exports.getSkill = function (name, RichEmbed, callback) {
                 callback(errMsg)
             }
         });
-    }
-    catch (err) {
+    } catch (err) {
         console.log(err, 'gasGetGetSkillError');
     }
 };
 
 //獲取黑特
-exports.getBlackList = function (callback) {
-    request(blackList, function (error, response) {
+exports.getBlackList = function(callback) {
+    request(blackList, function(error, response) {
         //if (error) throw new Error(error);
         if (error) {
             callback('出現意外錯誤~\n通常是google不開心了');
         } else {
-            if (response.body !== undefined && typeof (response.body) === 'string') {
+            if (response.body !== undefined && typeof(response.body) === 'string') {
                 if (response.body.substring(0, 1) !== '{') {
                     callback('出現意外錯誤~\n通常是google不開心了');
                 }
@@ -190,13 +189,13 @@ exports.getBlackList = function (callback) {
 };
 
 //獲取成就表
-exports.getMileage = function (callback) {
-    request(mileage, function (error, response) {
+exports.getMileage = function(callback) {
+    request(mileage, function(error, response) {
         //if (error) throw new Error(error);
         if (error) {
             callback(error);
         } else {
-            if (response.body !== undefined && typeof (response.body) === 'string') {
+            if (response.body !== undefined && typeof(response.body) === 'string') {
                 if (response.body.substring(0, 1) !== '[') {
                     callback('出現意外錯誤~\n通常是google不開心了');
                 }
@@ -218,14 +217,14 @@ exports.getMileage = function (callback) {
 };
 
 //獲取Boss資訊
-exports.getBoss = function (name, RichEmbed, callback) {
+exports.getBoss = function(name, RichEmbed, callback) {
     try {
         errMsg = '```樓層Boss查詢\n語法:攻略組 樓層 {層數}\n\n根據層數，反饋此樓層Boss資訊\n\n樓層名稱需與表單完全一致';
 
 
-        request(bosses, function (error, response) {
+        request(bosses, function(error, response) {
             if (error) callback('出現意外錯誤~\n通常是google不開心了');
-            if (response.body !== undefined && typeof (response.body) === 'string') {
+            if (response.body !== undefined && typeof(response.body) === 'string') {
                 if (response.body.substring(0, 1) !== '{') {
                     callback('出現意外錯誤~\n通常是google不開心了');
                 }
@@ -241,6 +240,9 @@ exports.getBoss = function (name, RichEmbed, callback) {
                 skills.push(data[name].skill3);
                 skills.push(data[name].skill4);
                 skills.push(data[name].skill5);
+                skills.push(data[name].skill6);
+                skills.push(data[name].skill7);
+                skills.push(data[name].skill8);
 
                 let tasks = new Array;
                 tasks.push(data[name].task1);
@@ -248,8 +250,11 @@ exports.getBoss = function (name, RichEmbed, callback) {
                 tasks.push(data[name].task3);
                 tasks.push(data[name].task4);
                 tasks.push(data[name].task5);
+                tasks.push(data[name].task6);
+                tasks.push(data[name].task7);
+                tasks.push(data[name].task8);
 
-                for (var i = 5; i >= 1; i--) {
+                for (var i = 8; i >= 1; i--) {
                     if (skills[i] !== '') {
                         skills[0] = i;
                         break;
@@ -292,8 +297,8 @@ exports.getBoss = function (name, RichEmbed, callback) {
                 msg = '\n目前表單收錄的樓層有~...\n';
                 let names = Object.keys(data)
                 for (var i = 0; i < names.length; i++) {
-                    msg = msg + `${paddingRightForCn(names[i], 7)}`;
-                    if (i % 6 == 5 && i != 0) {
+                    msg = msg + `${paddingRightFor(names[i], 7)}`;
+                    if (i % 5 == 4 && i != 0) {
                         msg = msg + '\n';
                     }
                 }
@@ -302,8 +307,7 @@ exports.getBoss = function (name, RichEmbed, callback) {
                 callback(errMsg)
             }
         });
-    }
-    catch (err) {
+    } catch (err) {
         console.log(err, 'gasGetGetBossError');
     }
 };
@@ -328,8 +332,8 @@ const foodImage = {
 
 //#region 實作
 //貓咪
-exports.getCatImage = function (callback) {
-    request(catImage, function (error, response) {
+exports.getCatImage = function(callback) {
+    request(catImage, function(error, response) {
         try {
             if (error) callback('出現錯誤!如果問題持續存在，請通知作者');
             const catImageData = JSON.parse(response.body);
@@ -345,8 +349,8 @@ exports.getCatImage = function (callback) {
     });
 };
 //食物
-exports.getFoodImage = function (callback) {
-    request(foodImage, function (error, response) {
+exports.getFoodImage = function(callback) {
+    request(foodImage, function(error, response) {
         try {
             if (error) callback('出現錯誤!如果問題持續存在，請通知作者');
             const foodImageData = JSON.parse(response.body);
@@ -366,6 +370,15 @@ exports.getFoodImage = function (callback) {
 //#endregion
 
 //#region 字串補空白
+
+function paddingRightFor(str, lenght) {
+    if (str.length >= lenght)
+        return str;
+    else
+        return paddingRightFor(str + " ", lenght);
+};
+
+//中文
 function paddingRightForCn(str, lenght) {
     if (str.length >= lenght)
         return str;

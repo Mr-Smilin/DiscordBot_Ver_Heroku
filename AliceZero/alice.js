@@ -4,6 +4,7 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 //播歌
 const ytdl = require('ytdl-core');
+const ytpl = require('ytpl');
 //#endregion
 
 //#region 繼承js
@@ -64,15 +65,15 @@ client.login(MyToken);
 client.on('ready', () => {
     downloading = true; //下載中
 
-    myDBFunction.getDataFormRanValue(function (value) {
+    myDBFunction.getDataFormRanValue(function(value) {
         if (value) {
             ranValue = value;
         }
-        myDBFunction.getDataFormBotMessage(function (value) {
+        myDBFunction.getDataFormBotMessage(function(value) {
             if (value) {
                 botMessage = value;
             }
-            myDBFunction.getDataFormUserMessage(function (value) {
+            myDBFunction.getDataFormUserMessage(function(value) {
                 if (value) {
                     userMessage = value;
                 }
@@ -262,7 +263,7 @@ function DoEditRomValue(msg, cmd, args) {
                         nowUseTheEditRomValueChannelID,
                         romValue,
                         ranValue,
-                        function (embed) {
+                        function(embed) {
                             msg.channel.send(embed);
                         });
                     break;
@@ -300,9 +301,9 @@ function DoEditRomValue(msg, cmd, args) {
                                 pushData.push(tempValue); // UserName
                                 tempValue = 'write';
                                 pushData.push(tempValue); // method
-                                myDBFunction.postDataForRanValue(pushData, function () {
+                                myDBFunction.postDataForRanValue(pushData, function() {
                                     downloading = true; //下載中
-                                    myDBFunction.getDataFormRanValue(function (value) {
+                                    myDBFunction.getDataFormRanValue(function(value) {
                                         if (value) {
                                             ranValue = value;
                                         }
@@ -332,7 +333,7 @@ function DoEditRomValue(msg, cmd, args) {
             nowUseTheEditRomValueChannelID,
             romValue,
             ranValue,
-            function (embed) {
+            function(embed) {
                 msg.channel.send(embed);
             });
     }
@@ -418,7 +419,7 @@ function DoBotMessageSend(msg, cmd, args) {
 
 //#region 抓刪
 //抓刪 更新事件
-client.on('messageUpdate', function (oldMessage, newMessage) {
+client.on('messageUpdate', function(oldMessage, newMessage) {
     if (!oldMessage.guild || !newMessage.guild) return;
 
     try {
@@ -436,7 +437,7 @@ client.on('messageUpdate', function (oldMessage, newMessage) {
 })
 
 //抓刪 刪除事件
-client.on('messageDelete', function (message) {
+client.on('messageDelete', function(message) {
     if (!message.guild) return;
 
     try {
@@ -462,7 +463,7 @@ client.on('messageDelete', function (message) {
 //#endregion
 
 //#region 更新頻道簡介
-client.on('channelUpdate', function (oldChannel, newChannel) {
+client.on('channelUpdate', function(oldChannel, newChannel) {
     try {
         //只做SAO群的簡介紀錄
         if (newChannel.guild) {
@@ -503,8 +504,8 @@ function LevelFunction(msg, cmd, args) {
         if (args[1] === undefined) {
             args[1] = 5;
         }
-        gasApi.getLevel(args[0], args[1], function (data) {
-            getLevel(args[0], data, function (msgs) {
+        gasApi.getLevel(args[0], args[1], function(data) {
+            getLevel(args[0], data, function(msgs) {
                 msg.channel.send(msgs);
             })
         })
@@ -529,14 +530,14 @@ function getLevel(level, data, callback) {
 
 //技能
 function SkillFunction(msg, cmd, args) {
-    gasApi.getSkill(args[0], Discord.RichEmbed, function (msgs) {
+    gasApi.getSkill(args[0], Discord.RichEmbed, function(msgs) {
         msg.channel.send(msgs);
     });
 }
 
 //黑特
 function BlackListFunction(msgA, cmd, args) {
-    gasApi.getBlackList(function (msgData) {
+    gasApi.getBlackList(function(msgData) {
         let many = 4; //一次顯示幾筆
         let i = 0;
         let msgs = '```';
@@ -619,10 +620,10 @@ function EditBlackList(temp, msgData, msg, many) {
 
 //成就
 function MileageFunction(msgA, cmd, args) {
-    gasApi.getMileage(function (msgData) {
-        if (typeof (msgData) == 'string') {
+    gasApi.getMileage(function(msgData) {
+        if (typeof(msgData) == 'string') {
             msgA.channel.send(msgData);
-        } else if (typeof (msgData) == 'object') {
+        } else if (typeof(msgData) == 'object') {
             let texture = ['🔟', '🇦', '🇧', '🇨', '🇩', '🇪', '🇫', '🇬', '🇭', '🇮', '🇯']
             let str = '';
             for (i = 1; i < msgData.length; i++) {
@@ -663,7 +664,7 @@ function MileageFunction(msgA, cmd, args) {
 
 //樓層訊息
 function BossFunction(msg, cmd, args) {
-    gasApi.getBoss(args[0], Discord.RichEmbed, function (msgs) {
+    gasApi.getBoss(args[0], Discord.RichEmbed, function(msgs) {
         msg.channel.send(msgs);
     });
 }
@@ -672,7 +673,7 @@ function BossFunction(msg, cmd, args) {
 //#region 找資料
 //找根據id找romValue的對應資料
 function findRomValueToID(idName, itemName) {
-    e = romValue.filter(function (item) {
+    e = romValue.filter(function(item) {
         return item.id == idName
     })
     switch (itemName) {
@@ -801,6 +802,8 @@ async function goToMusicHouse(msg, cmd, args) {
                 return addMusicToOne(msg, args);
             case '先播這首':
                 return addMusicToOne(msg, args);
+            case '歌單':
+                return playMusicList(msg, args);
         }
 
         let validate = await ytdl.validateURL(cmd);
@@ -932,6 +935,8 @@ function addMusicInfoToSongInfo(nowMusicPlayGuild, info, type = 1) {
                     songInfo.get(nowMusicPlayGuild).unshift(info.videoDetails);
                 }
             }
+        } else if (type === 3) {
+            songInfo.get(nowMusicPlayGuild).push(info);
         }
     } catch (err) {
         console.log('addMusicInfoToSongInfo')
@@ -1097,6 +1102,23 @@ function musicMaster(msg) {
         msg.channel.send(`There's error in this function, so you can ask administer for help.`);
     }
 }
+
+//歌單功能
+async function playMusicList(msg, args) {
+    try {
+        const canPlay = await ytpl.validateID(args[0]);
+        if (canPlay) {
+            const listED = await ytpl(args[0]);
+            const nowMusicPlayGuild = msg.guild.id
+            listED.items.forEach(element => {
+                addMusicToSongList(nowMusicPlayGuild, element.url_simple);
+                addMusicInfoToSongInfo(nowMusicPlayGuild, element.title, 3);
+            });
+        }
+    } catch (err) {
+        console.log(err, 'playMusicListError');
+    }
+}
 //#endregion
 
 //#region 小/基本功能
@@ -1104,22 +1126,22 @@ function musicMaster(msg) {
 function GetHelpMessage(msg, args) {
     switch (args[0]) {
         case '!':
-            messageManager.HelpMessage2(Discord.RichEmbed, function (embed) {
+            messageManager.HelpMessage2(Discord.RichEmbed, function(embed) {
                 msg.channel.send(embed);
             })
             break;
         case '攻略組':
-            messageManager.HelpMessage3(Discord.RichEmbed, function (embed) {
+            messageManager.HelpMessage3(Discord.RichEmbed, function(embed) {
                 msg.channel.send(embed);
             })
             break;
         case 'T':
-            messageManager.HelpMessage4(Discord.RichEmbed, function (embed) {
+            messageManager.HelpMessage4(Discord.RichEmbed, function(embed) {
                 msg.channel.send(embed);
             })
             break;
         default:
-            messageManager.HelpMessage(Discord.RichEmbed, function (embed) {
+            messageManager.HelpMessage(Discord.RichEmbed, function(embed) {
                 msg.channel.send(embed);
             })
             break;
@@ -1190,18 +1212,18 @@ function getDice(msg, cmd, args) {
         if (regex5.test(args[0]) && args[0] != '') {
             getBaceDice(msg, args, '2', rangeText)
         } else
-            if (regex4.test(args[0]) && args[0] != '') {
-                getBaceDice(msg, args, '1', rangeText)
-            } else
-                if (regex2.test(args[0]) && args[0] != '') {
-                    getBaceDice(msg, args, '0', rangeText)
-                } else {
-                    if (regex.test(args[0]) && args[0] != '') {
-                        range = args[0];
-                    }
-                    const a = Math.floor((Math.random() * range) + 1);
-                    msg.channel.send(`${msg.author.username} ${rangeText[Math.floor(Math.random() * rangeText.length)]} ${a} 點!!`);
-                }
+        if (regex4.test(args[0]) && args[0] != '') {
+            getBaceDice(msg, args, '1', rangeText)
+        } else
+        if (regex2.test(args[0]) && args[0] != '') {
+            getBaceDice(msg, args, '0', rangeText)
+        } else {
+            if (regex.test(args[0]) && args[0] != '') {
+                range = args[0];
+            }
+            const a = Math.floor((Math.random() * range) + 1);
+            msg.channel.send(`${msg.author.username} ${rangeText[Math.floor(Math.random() * rangeText.length)]} ${a} 點!!`);
+        }
     } catch (err) {
         console.log(err);
     }
@@ -1416,7 +1438,7 @@ function getTRpgDice2(msg, args, typeED) {
 //排序
 function getRandomSortArray(msg, cmd, args) {
     try {
-        const randomArray = args.sort(function () {
+        const randomArray = args.sort(function() {
             return .5 - Math.random();
         });
         const mStr = `排序\n→ ${randomArray}`;
