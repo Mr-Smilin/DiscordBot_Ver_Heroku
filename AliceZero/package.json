@@ -8,7 +8,7 @@
         "start": "node alice.js"
     },
     "dependencies": {
-        "axios": "^0.19.2",
+        "axios": "^0.21.1",
         "discord.js": "^11.6.4",
         "discord.js-commando": "^0.10.0",
         "ffmpeg-static": "^4.2.5",
